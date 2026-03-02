@@ -4917,7 +4917,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                           <ImageIcon size={12} strokeWidth={3} />
                           <div className="relative flex items-center">
                             <select
-                              className="bg-transparent outline-none appearance-none cursor-pointer font-bold pr-4 pl-1"
+                              className="bg-transparent outline-none appearance-none cursor-pointer font-bold pr-4 pl-1 text-[11px] max-w-[150px] sm:max-w-[200px] truncate"
                               value={imageAspectRatio}
                               onChange={(e) => setImageAspectRatio(e.target.value)}
                             >
@@ -4936,7 +4936,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                           <Video size={12} strokeWidth={3} />
                           <div className="relative flex items-center">
                             <select
-                              className="bg-transparent outline-none appearance-none cursor-pointer font-bold pr-4 pl-1"
+                              className="bg-transparent outline-none appearance-none cursor-pointer font-bold pr-4 pl-1 text-[11px] max-w-[150px] sm:max-w-[200px] truncate"
                               value={videoAspectRatio}
                               onChange={(e) => setVideoAspectRatio(e.target.value)}
                             >
