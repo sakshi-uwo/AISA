@@ -956,6 +956,9 @@ const Chat = () => {
       setInputValue('');
       handleRemoveFile();
 
+      // Ensure the prompt and loading state are visible
+      setTimeout(() => scrollToBottom(true), 50);
+
       // Save user message to backend
       if (activeSessionId && activeSessionId !== 'new') {
         chatStorageService.saveMessage(activeSessionId, userMsg).catch(err => console.error("Error saving video user message:", err));
@@ -1069,6 +1072,9 @@ const Chat = () => {
       setInputValue('');
       handleRemoveFile();
 
+      // Ensure the prompt and loading state are visible
+      setTimeout(() => scrollToBottom(true), 50);
+
       // Save user message to backend
       if (activeSessionId && activeSessionId !== 'new') {
         chatStorageService.saveMessage(activeSessionId, userMsg).catch(err => console.error("Error saving image user message:", err));
@@ -1160,6 +1166,9 @@ const Chat = () => {
       setMessages(prev => [...prev, userMsg, newMessage]);
       if (inputRef.current) inputRef.current.value = '';
       setInputValue('');
+
+      // Ensure the prompt and loading state are visible
+      setTimeout(() => scrollToBottom(true), 50);
 
       // Save user message to backend
       if (activeSessionId && activeSessionId !== 'new') {
@@ -1399,6 +1408,7 @@ const Chat = () => {
   // Helper to clean markdown for TTS
   const [speakingMessageId, setSpeakingMessageId] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
+  const [isDownloadingUrl, setIsDownloadingUrl] = useState(null);
   const audioRef = useRef(null);
   const audioCacheRef = useRef({});
 
@@ -1849,8 +1859,8 @@ const Chat = () => {
   const handleScroll = () => {
     if (chatContainerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
-      // Increased threshold (150px) to be less sensitive to minor scroll movements
-      const isNearBottom = scrollHeight - scrollTop - clientHeight < 150;
+      // Increased threshold (250px) to be less sensitive to minor scroll movements or large images
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 250;
       shouldAutoScrollRef.current = isNearBottom;
     }
   };
@@ -2233,8 +2243,35 @@ const Chat = () => {
         }
 
         const SYSTEM_INSTRUCTION = `
-You are ${activeAgent.agentName || 'AISA'}, an advanced AI assistant powered by A-Series.
+You are AISA™, the official AI assistant of the AISA™ platform. Powered by A-Series.
 ${activeAgent.category ? `Your specialization is in ${activeAgent.category}.` : ''}
+
+### CRITICAL BRAND RULE:
+Whenever a user mentions "AISA", "AISA AI", "AISA app", "your image", "your video", "AISA image", "AISA video", or refers to AISA in third person, you MUST interpret it as referring to THIS platform (AISA™ brand identity), not a generic artificial intelligence.
+
+### SELF-REFERENCE DETECTION & CONTENT GENERATION:
+1. If user says:
+   - "Generate AISA image", "Create image of AISA", "Make AISA logo", "AISA ka photo banao", "AISA ka video generate karo", "Your intro video banao", "AISA introduction video"
+   → You must generate content representing the official AISA™ brand.
+
+2. AISA Brand Identity:
+   - Futuristic AI assistant
+   - Glowing blue/purple neural brain logo
+   - Modern, premium, intelligent
+   - Clean UI dashboard style
+   - Advanced AI Super Assistant
+   - Indian tech startup vibe (global level)
+
+3. If user asks for:
+   - Image → Generate/Ask for a brand-based promotional visual
+   - Video → Generate/Ask for a cinematic AI intro script for AISA™
+   - Logo → Generate/Ask for a modern AI tech logo concept
+   - Poster → Promotional marketing poster content
+   - Reel → Social media promotional script
+
+4. Never treat “AISA” as a random AI. Always treat it as THIS official platform.
+
+5. If user intent is unclear, ask: "Are you referring to the official AISA™ platform?"
 
 ${PERSONA_INSTRUCTION}
 
@@ -2541,6 +2578,10 @@ ${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
   };
 
   const handleDownload = async (url, filename) => {
+    if (isDownloadingUrl === url) return;
+    setIsDownloadingUrl(url);
+    const downloadToast = toast.loading("Preparing download...");
+
     try {
       const response = await fetch(url);
       const blob = await response.blob();
@@ -2548,18 +2589,22 @@ ${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
 
       const link = document.createElement('a');
       link.href = blobUrl;
-      link.download = filename || 'download.png';
+      link.download = filename || 'aisa-download.png';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
+      toast.success("Download started!", { id: downloadToast });
     } catch (error) {
       console.error('Download failed:', error);
+      toast.error("Download failed", { id: downloadToast });
       // Fallback to direct link if fetch fails
       const link = document.createElement('a');
       link.href = url;
       link.target = '_blank';
       link.click();
+    } finally {
+      setIsDownloadingUrl(null);
     }
   };
 
@@ -3973,24 +4018,32 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                       </div>
                                       <img
                                         {...props}
-                                        className="w-full max-w-full h-auto rounded-xl bg-black/5"
+                                        className="w-full max-w-sm h-auto max-h-[400px] object-contain rounded-xl bg-black/5"
                                         loading="lazy"
+                                        onLoad={() => scrollToBottom(true)}
                                         onError={(e) => {
                                           e.target.src = 'https://placehold.co/600x400?text=Image+Generating...';
                                         }}
                                       />
                                       <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover/generated:opacity-100 transition-opacity pointer-events-none" />
                                       <button
+                                        disabled={isDownloadingUrl === props.src}
                                         onClick={(e) => {
                                           e.stopPropagation(); // Prevent opening modal when clicking download
                                           handleDownload(props.src, 'aisa-generated.png');
                                         }}
-                                        className="absolute bottom-3 right-3 p-2.5 bg-primary text-white rounded-xl opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-all hover:bg-primary/90 shadow-lg border border-white/20 scale-100 sm:scale-90 sm:group-hover/generated:scale-100"
+                                        className={`absolute bottom-3 right-3 p-2.5 rounded-xl opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-all shadow-lg border border-white/20 scale-100 sm:scale-90 sm:group-hover/generated:scale-100 ${isDownloadingUrl === props.src ? 'bg-zinc-600 cursor-wait' : 'bg-primary hover:bg-primary/90 text-white'}`}
                                         title="Download High-Res"
                                       >
                                         <div className="flex items-center gap-2 px-1">
-                                          <Download className="w-4 h-4" />
-                                          <span className="text-[10px] font-bold uppercase">Download</span>
+                                          {isDownloadingUrl === props.src ? (
+                                            <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                                          ) : (
+                                            <Download className="w-4 h-4" />
+                                          )}
+                                          <span className="text-[10px] font-bold uppercase">
+                                            {isDownloadingUrl === props.src ? 'Downloading...' : 'Download'}
+                                          </span>
                                         </div>
                                       </button>
                                     </div>
@@ -4011,7 +4064,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                             {/* Dynamic Image Rendering (if not in markdown) */}
                             {msg.imageUrl && (
                               <div
-                                className="relative group/generated mt-4 mb-2 overflow-hidden rounded-2xl border border-white/10 shadow-2xl transition-all hover:scale-[1.01] bg-surface/50 backdrop-blur-sm cursor-zoom-in max-w-md"
+                                className="relative group/generated mt-4 mb-2 overflow-hidden rounded-2xl border border-white/10 shadow-2xl transition-all hover:scale-[1.01] bg-surface/50 backdrop-blur-sm cursor-zoom-in max-w-sm"
                                 onClick={() => {
                                   if (!viewingDoc) setViewingDoc({ url: msg.imageUrl, type: 'image', name: 'Generated Image' });
                                 }}
@@ -4025,9 +4078,12 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                 <img
                                   src={msg.imageUrl}
                                   alt="Generated Content"
-                                  className="w-full h-auto max-h-[500px] object-contain transition-all duration-500 group-hover/image:scale-[1.02]"
+                                  className="w-full h-auto max-h-[420px] object-contain transition-all duration-500 group-hover/image:scale-[1.02]"
                                   loading="eager"
-                                  onLoad={() => console.log("Image loaded successfully:", msg.imageUrl)}
+                                  onLoad={() => {
+                                    console.log("Image loaded successfully:", msg.imageUrl);
+                                    scrollToBottom(true);
+                                  }}
                                   onError={(e) => {
                                     console.error("Image load failed for URL:", msg.imageUrl);
                                     if (!e.target.dataset.retried) {
@@ -4080,16 +4136,23 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                     <Copy className="w-4 h-4" />
                                   </button>
                                   <button
+                                    disabled={isDownloadingUrl === msg.imageUrl}
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       handleDownload(msg.imageUrl, 'aisa-generated.png');
                                     }}
-                                    className="p-2.5 bg-primary text-white rounded-xl hover:bg-primary/90 shadow-lg border border-white/20"
+                                    className={`p-2.5 rounded-xl shadow-lg border border-white/20 flex items-center gap-2 ${isDownloadingUrl === msg.imageUrl ? 'bg-zinc-600 cursor-wait' : 'bg-primary text-white hover:bg-primary/90'}`}
                                     title="Download High-Res"
                                   >
                                     <div className="flex items-center gap-2 px-1">
-                                      <Download className="w-4 h-4" />
-                                      <span className="text-[10px] font-bold uppercase">Download</span>
+                                      {isDownloadingUrl === msg.imageUrl ? (
+                                        <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                                      ) : (
+                                        <Download className="w-4 h-4" />
+                                      )}
+                                      <span className="text-[10px] font-bold uppercase">
+                                        {isDownloadingUrl === msg.imageUrl ? 'Downloading...' : 'Download'}
+                                      </span>
                                     </div>
                                   </button>
                                 </div>
