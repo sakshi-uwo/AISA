@@ -195,8 +195,12 @@ const CustomVideoPlayer = ({ src }) => {
         };
     }, []);
 
+    const [isDownloading, setIsDownloading] = useState(false);
     const handleDownload = async (e) => {
         e.stopPropagation();
+        if (isDownloading) return;
+
+        setIsDownloading(true);
         try {
             // Fetch the video through our backend proxy to bypass cross-origin restrictions
             const blob = await apiService.downloadVideo(src);
@@ -220,6 +224,8 @@ const CustomVideoPlayer = ({ src }) => {
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+        } finally {
+            setIsDownloading(false);
         }
     };
 
@@ -281,11 +287,16 @@ const CustomVideoPlayer = ({ src }) => {
                     {/* Download Button */}
                     <button
                         onClick={handleDownload}
-                        className="flex items-center gap-1 sm:gap-1.5 bg-primary hover:bg-primary/90 transition-all px-2 py-1 sm:px-3 sm:py-1.5 rounded text-white font-bold text-[8px] sm:text-[10px] tracking-wide shrink-0"
-                        title="Download Video"
+                        disabled={isDownloading}
+                        className={`flex items-center gap-1 sm:gap-1.5 bg-primary hover:bg-primary/90 transition-all px-2 py-1 sm:px-3 sm:py-1.5 rounded text-white font-bold text-[8px] sm:text-[10px] tracking-wide shrink-0 ${isDownloading ? 'opacity-70 scale-95 cursor-wait animate-pulse' : 'active:scale-95'}`}
+                        title={isDownloading ? "Downloading..." : "Download Video"}
                     >
-                        <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                        <span>DOWNLOAD</span>
+                        {isDownloading ? (
+                            <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                            <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                        )}
+                        <span>{isDownloading ? 'DOWNLOADING...' : 'DOWNLOAD'}</span>
                     </button>
 
                     {/* Skip Backward */}

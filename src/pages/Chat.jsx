@@ -692,11 +692,16 @@ const Chat = () => {
       }, 1200);
 
       try {
+        console.log(`[VoiceConversion] Sending request to: ${apis.synthesizeFile}`);
         const response = await axios.post(apis.synthesizeFile, {
           fileData: base64Data,
           mimeType: file.type || 'application/pdf',
           gender: 'FEMALE'
-        }, { responseType: 'arraybuffer', timeout: 0, headers: { Authorization: `Bearer ${getUserData()?.token}` } });
+        }, {
+          responseType: 'arraybuffer',
+          timeout: 300000, // 5 minute timeout for large files on live servers
+          headers: { Authorization: `Bearer ${getUserData()?.token}` }
+        });
 
         const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
         const audioUrl = URL.createObjectURL(audioBlob);
