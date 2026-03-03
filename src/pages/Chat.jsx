@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, Fragment } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useSubscription } from '../context/SubscriptionContext';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Send, Bot, User, Sparkles, Plus, Monitor, ChevronDown, History, Paperclip, X, FileText, Image as ImageIcon, Cloud, HardDrive, Edit2, Download, Mic, Wand2, Eye, FileSpreadsheet, Presentation, File as FileIcon, MoreVertical, Trash2, Check, Camera, Video, Copy, ThumbsUp, ThumbsDown, Share, Search, Undo2, Menu as MenuIcon, Volume2, Pause, Headphones, MessageCircle, ExternalLink, ZoomIn, ZoomOut, RotateCcw, Minus, Code } from 'lucide-react';
+import { Send, Bot, User, Sparkles, Plus, Monitor, ChevronDown, History, Paperclip, X, FileText, Image as ImageIcon, Cloud, HardDrive, Edit2, Download, Mic, Wand2, Eye, FileSpreadsheet, Presentation, File as FileIcon, MoreVertical, Trash2, Check, Camera, Video, Copy, ThumbsUp, ThumbsDown, Share, Search, Undo2, Menu as MenuIcon, Volume2, Pause, Headphones, MessageCircle, ExternalLink, ZoomIn, ZoomOut, RotateCcw, Minus, Code, Globe } from 'lucide-react';
 import { renderAsync } from 'docx-preview';
 import * as XLSX from 'xlsx';
 import { Menu, Transition, Dialog, Portal } from '@headlessui/react';
@@ -293,6 +293,7 @@ const Chat = () => {
   const [selectedToolType, setSelectedToolType] = useState(null);
   const [currentMode, setCurrentMode] = useState('NORMAL_CHAT');
   const [isDeepSearch, setIsDeepSearch] = useState(false);
+  const [isWebSearch, setIsWebSearch] = useState(false);
   const [isImageGeneration, setIsImageGeneration] = useState(false);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [isAudioConvertMode, setIsAudioConvertMode] = useState(false);
@@ -1940,6 +1941,12 @@ const Chat = () => {
         check: () => lowerContent.includes('deep search') || lowerContent.includes('research')
       },
       {
+        id: 'websearch',
+        name: 'Real-Time Web Search',
+        active: isWebSearch,
+        check: () => lowerContent.includes('search the web') || lowerContent.includes('live data') || lowerContent.includes('current news') || lowerContent.includes('aaj ki') || lowerContent.includes('latest')
+      },
+      {
         id: 'audio',
         name: 'Convert to Audio',
         active: isAudioConvertMode,
@@ -1973,6 +1980,7 @@ const Chat = () => {
     // --- Subscription Limit Checks ---
     let featureToTrack = 'chat';
     if (isDeepSearch) featureToTrack = 'deepSearch';
+    else if (isWebSearch) featureToTrack = 'webSearch';
     else if (isDocumentConvert) featureToTrack = 'document';
     else if (isCodeWriter) featureToTrack = 'codeWriter';
 
@@ -2141,14 +2149,19 @@ const Chat = () => {
       scrollToBottom(true, 'smooth'); // Force smooth scroll for user message
       setInputValue('');
 
-      // Capture deep search state before resetting
+      // Capture mode states before resetting
       const deepSearchActive = isDeepSearch;
       if (isDeepSearch) setIsDeepSearch(false);
       const documentConvertActive = isDocumentConvert;
       if (isDocumentConvert) setIsDocumentConvert(false);
+      const webSearchActive = isWebSearch;
+      if (isWebSearch) setIsWebSearch(false);
 
       // Detect mode for UI indicator
-      const detectedMode = deepSearchActive ? MODES.DEEP_SEARCH : (documentConvertActive ? MODES.FILE_CONVERSION : detectMode(contentToSend, userMsg.attachments));
+      const detectedMode = deepSearchActive ? MODES.DEEP_SEARCH :
+        (documentConvertActive ? MODES.DOCUMENT_CONVERT :
+          (webSearchActive ? MODES.WEB_SEARCH :
+            detectMode(contentToSend, userMsg.attachments)));
       setCurrentMode(detectedMode);
 
       // Update user message with the detected mode
@@ -2165,6 +2178,22 @@ const Chat = () => {
         setLoadingText("Generating Video... 🎥");
       } else if (documentConvertActive) {
         setLoadingText("Converting Document... 🔄");
+      } else if (
+        lowerContent.includes('news') ||
+        lowerContent.includes('price') ||
+        lowerContent.includes('score') ||
+        lowerContent.includes('weather') ||
+        lowerContent.includes('latest') ||
+        lowerContent.includes('current') ||
+        lowerContent.includes('aaj') ||
+        lowerContent.includes('date') ||
+        lowerContent.includes('time') ||
+        lowerContent.includes('samay') ||
+        lowerContent.includes('tareekh') ||
+        lowerContent.includes('rate') ||
+        lowerContent.includes('bhav')
+      ) {
+        setLoadingText("Searching the web... 🌐");
       } else {
         setLoadingText("Thinking...");
       }
@@ -2389,12 +2418,17 @@ ${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
         let conversionData = null;
         let aiVideoUrl = null;
         let aiImageUrl = null;
+        let isRealTimeResponse = false;
+        let responseSources = [];
 
         if (typeof aiResponseData === 'string') {
           aiResponseText = aiResponseData;
         } else if (aiResponseData && typeof aiResponseData === 'object') {
-          aiResponseText = aiResponseData.reply || "No response generated. (Object received without reply)";
+          // Compatibility with both 'reply' and 'data' properties from backend
+          aiResponseText = aiResponseData.reply || aiResponseData.data || "No response generated.";
           conversionData = aiResponseData.conversion || null;
+          isRealTimeResponse = aiResponseData.isRealTime || false;
+          responseSources = aiResponseData.sources || [];
           // Extract media URLs if present
           aiVideoUrl = aiResponseData.videoUrl || null;
           aiImageUrl = aiResponseData.imageUrl || null;
@@ -2427,6 +2461,8 @@ ${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
             id: msgId,
             role: 'model',
             content: '', // Start empty for typewriter effect
+            isRealTime: isRealTimeResponse,
+            sources: responseSources,
             timestamp: Date.now() + i * 100,
           };
 
@@ -2472,6 +2508,8 @@ ${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
             if (conversionData) finalModelMsg.conversion = conversionData;
             if (aiVideoUrl) finalModelMsg.videoUrl = aiVideoUrl;
             if (aiImageUrl) finalModelMsg.imageUrl = aiImageUrl;
+            finalModelMsg.isRealTime = isRealTimeResponse;
+            finalModelMsg.sources = responseSources;
           }
 
           // After typing is complete, save the full message to history
@@ -2712,7 +2750,11 @@ ${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
       // Try native share (works on mobile)
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
-          await navigator.share({ files: [file] });
+          await navigator.share({
+            files: [file],
+            title: file.name || 'AISA Document',
+            text: 'Converted Document from AISA'
+          });
           return;
         } catch (err) {
           if (err.name === 'AbortError') return; // User cancelled
@@ -2776,7 +2818,11 @@ ${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
         } else if (action === 'share') {
           if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
             try {
-              await navigator.share({ files: [file] });
+              await navigator.share({
+                files: [file],
+                title: 'AISA AI Response',
+                text: msg && msg.content ? `${msg.content.substring(0, 150)}...` : 'AISA Document output'
+              });
               toast.success("PDF sent to share menu!", { id: shareToastId });
             } catch (shareErr) {
               if (shareErr.name !== 'AbortError') {
@@ -2987,7 +3033,11 @@ ${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
 
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
-            await navigator.share({ files: [file] });
+            await navigator.share({
+              files: [file],
+              title: 'AISA AI Response',
+              text: msg && msg.content ? `${msg.content.substring(0, 150)}...` : 'AISA Document output'
+            });
             if (processToastId) toast.success("PDF sent to share menu!", { id: processToastId });
           } catch (shareErr) {
             if (shareErr.name !== 'AbortError') {
@@ -3937,6 +3987,13 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-white">Deep Search</span>
                               </div>
                             )}
+                            {msg.role === 'model' && msg.isRealTime && (
+                              <div className="flex items-center gap-2 mb-3 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full w-fit animate-pulse-slow">
+                                <span className="text-lg">🌐</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-blue-500">Real-Time Data</span>
+                              </div>
+                            )}
+
                             <ReactMarkdown
                               remarkPlugins={[remarkGfm]}
                               components={{
@@ -4054,6 +4111,34 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                             >
                               {msg.content || msg.text || ""}
                             </ReactMarkdown>
+
+                            {/* Real-Time Sources List */}
+                            {msg.role === 'model' && msg.isRealTime && msg.sources && msg.sources.length > 0 && (
+                              <div className="mt-4 pt-4 border-t border-border/50">
+                                <p className="text-[10px] font-bold uppercase text-subtext mb-3 flex items-center gap-2">
+                                  <ExternalLink className="w-3 h-3" />
+                                  Trusted Sources
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                  {msg.sources.map((source, sIdx) => (
+                                    <a
+                                      key={sIdx}
+                                      href={source.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex items-center gap-2 px-3 py-1.5 bg-secondary/50 hover:bg-primary/10 border border-border rounded-lg transition-all group/source"
+                                    >
+                                      <span className="text-xs font-medium text-maintext group-hover/source:text-primary truncate max-w-[150px]">
+                                        {source.title}
+                                      </span>
+                                      <div className="w-4 h-4 bg-primary/20 rounded flex items-center justify-center">
+                                        <ExternalLink className="w-2.5 h-2.5 text-primary" />
+                                      </div>
+                                    </a>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
 
                             {/* Dynamic Video Rendering */}
                             {msg.videoUrl && (
@@ -4563,10 +4648,24 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                       action: () => uploadInputRef.current?.click()
                     },
                     {
-                      icon: <Mic className="w-5 h-5 text-green-500" />,
-                      title: "Voice Chat",
-                      desc: "Talk to AISA naturally",
-                      action: () => handleVoiceInput()
+                      icon: <Globe className="w-5 h-5 text-blue-500" />,
+                      title: "Real-Time Search",
+                      desc: "Get live data from the web",
+                      action: () => {
+                        setIsWebSearch(true);
+                        if (inputRef.current) inputRef.current.focus();
+                        toast.success("Real-Time Web Search Enabled");
+                      }
+                    },
+                    {
+                      icon: <Code className="w-5 h-5 text-indigo-500" />,
+                      title: "Code Writer",
+                      desc: "Write & debug code",
+                      action: () => {
+                        setIsCodeWriter(true);
+                        if (inputRef.current) inputRef.current.focus();
+                        toast.success("Code Writer Mode Enabled");
+                      }
                     }
                   ].map((item, index) => (
                     <button
@@ -4789,7 +4888,32 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                           type="button"
                           onClick={() => {
                             setIsToolsMenuOpen(false);
+                            setIsWebSearch(!isWebSearch);
+                            setIsDeepSearch(false);
+                            setIsImageGeneration(false);
+                            setIsVideoGeneration(false);
+                            setIsAudioConvertMode(false);
+                            setIsDocumentConvert(false);
+                            setIsCodeWriter(false);
+                            if (!isWebSearch) toast.success("Real-Time Web Search Active");
+                          }}
+                          className={`w-full text-left px-3 py-2 flex items-center gap-3 rounded-2xl transition-all group cursor-pointer ${isWebSearch ? 'bg-primary/10' : 'hover:bg-primary/5'}`}
+                        >
+                          <div className={`w-10 h-10 rounded-full border flex items-center justify-center transition-colors shrink-0 ${isWebSearch ? 'bg-primary border-primary text-white' : 'bg-surface border-border group-hover:border-primary/30 group-hover:bg-primary/10'}`}>
+                            <Globe className="w-4.5 h-4.5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className="text-[14px] font-bold text-maintext block leading-tight">Web Search</span>
+                            <span className="text-[10px] text-subtext block leading-tight truncate mt-0.5">Live information from the web</span>
+                          </div>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsToolsMenuOpen(false);
                             setIsDeepSearch(!isDeepSearch);
+                            setIsWebSearch(false);
                             setIsImageGeneration(false);
                             setIsVideoGeneration(false);
                             setIsAudioConvertMode(false);
@@ -4904,8 +5028,14 @@ For "Remix" requests with an attachment, analyze the attached image, then create
 
               <div className="flex-1 flex items-center min-w-0 bg-transparent border-0 ring-0 focus:ring-0">
                 <AnimatePresence>
-                  {(isDeepSearch || isImageGeneration || isVideoGeneration || isVoiceMode || isAudioConvertMode || isDocumentConvert || isCodeWriter || isMagicEditing) && (
+                  {(isWebSearch || isDeepSearch || isImageGeneration || isVideoGeneration || isVoiceMode || isAudioConvertMode || isDocumentConvert || isCodeWriter || isMagicEditing) && (
                     <div className="absolute bottom-full left-0 mb-3 flex gap-2 overflow-x-auto no-scrollbar pointer-events-auto w-full">
+                      {isWebSearch && (
+                        <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 bg-blue-500/10 text-blue-600 rounded-full text-xs font-bold border border-blue-500/20 backdrop-blur-md whitespace-nowrap shrink-0">
+                          <Globe size={12} strokeWidth={3} /> <span className="hidden sm:inline">Web Search</span>
+                          <button onClick={() => setIsWebSearch(false)} className="ml-1 hover:text-blue-800"><X size={12} /></button>
+                        </motion.div>
+                      )}
                       {isDeepSearch && (
                         <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold border border-primary/20 backdrop-blur-md whitespace-nowrap shrink-0">
                           <Search size={12} strokeWidth={3} /> <span className="hidden sm:inline">Deep Search</span>

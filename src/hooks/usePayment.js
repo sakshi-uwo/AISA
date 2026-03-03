@@ -17,57 +17,72 @@ const usePayment = () => {
         });
     };
 
-    const handlePayment = useCallback(async (plan, user, onSuccess) => {
+    const handlePayment = useCallback(async (planName, user, onSuccess) => {
+        console.log(`[PAYMENT] Initializing purchase for plan: ${planName}`);
         setLoading(true);
         try {
+            if (!user?.token) {
+                throw new Error("User authentication token is missing. Please log in again.");
+            }
+
             // 1. Create Order on Backend
-            const { data: orderData } = await axios.post(apis.createOrder, {
-                plan: plan.name || plan.id
+            console.log(`[PAYMENT] Creating order on backend for ${planName}...`);
+            const { data: orderData } = await axios.post(apis.subscription.purchase, {
+                planName: planName
             }, {
                 headers: { 'Authorization': `Bearer ${user.token}` }
             });
 
-            // Handle Free Plan (Basic) - direct update
-            if (orderData.amount === 0) {
-                toast.success('Plan updated to Basic successfully!');
-                if (onSuccess) onSuccess(orderData.user);
+            console.log(`[PAYMENT] Backend order response:`, orderData);
+
+            if (!orderData.success) {
+                toast.error(orderData.message || 'Failed to create order');
                 setLoading(false);
                 return;
             }
 
             // 2. Load Razorpay SDK
+            console.log(`[PAYMENT] Loading Razorpay SDK...`);
             const scriptLoaded = await loadRazorpayScript();
             if (!scriptLoaded) {
+                console.error(`[PAYMENT] Razorpay SDK failed to load`);
                 toast.error('Failed to load payment gateway. Please try again.');
                 setLoading(false);
                 return;
             }
 
             // 3. Configure Razorpay Checkout
+            console.log(`[PAYMENT] Opening Razorpay checkout window...`);
             const options = {
-                key: orderData.key, // Razorpay Key ID from backend
-                amount: orderData.amount, // Amount in paise
-                currency: orderData.currency,
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_SBFlInxBiRfOGd', 
+                amount: orderData.order.amount, // Amount in paise
+                currency: orderData.order.currency,
                 name: 'AISA',
-                description: `${plan.name} Plan Subscription`,
-                order_id: orderData.id,
+                description: `${planName} Plan Subscription`,
+                order_id: orderData.order.id,
                 handler: async function (response) {
+                    console.log(`[PAYMENT] Razorpay payment successful, verifying on backend...`, response);
                     // 4. Payment Success - Verify on Backend
                     try {
-                        const verifyResult = await axios.post(apis.verifyPayment, {
+                        const verifyResult = await axios.post(apis.subscription.verify, {
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_signature: response.razorpay_signature,
-                            plan: plan.name,
-                            amount: orderData.amount
+                            planName: planName
                         }, {
                             headers: { 'Authorization': `Bearer ${user.token}` }
                         });
 
-                        toast.success('🎉 Payment Successful! Plan Upgraded.');
-                        if (onSuccess) onSuccess(verifyResult.data.user);
+                        console.log(`[PAYMENT] Backend verification response:`, verifyResult.data);
+
+                        if (verifyResult.data.success) {
+                            toast.success('🎉 Payment Successful! Plan Upgraded.');
+                            if (onSuccess) onSuccess();
+                        } else {
+                            toast.error(verifyResult.data.message || 'Verification failed');
+                        }
                     } catch (error) {
-                        console.error('Payment verification error:', error);
+                        console.error('[PAYMENT] Verification error:', error);
                         toast.error('Payment verification failed. Please contact support.');
                     } finally {
                         setLoading(false);
@@ -78,10 +93,11 @@ const usePayment = () => {
                     email: user.email || '',
                 },
                 theme: {
-                    color: '#6366f1' // Indigo color matching your app theme
+                    color: '#6366f1'
                 },
                 modal: {
                     ondismiss: function () {
+                        console.log(`[PAYMENT] Checkout modal dismissed by user`);
                         toast.error('Payment cancelled');
                         setLoading(false);
                     }
@@ -89,28 +105,17 @@ const usePayment = () => {
             };
 
             // 5. Open Razorpay Checkout
+            if (!window.Razorpay) {
+                console.error(`[PAYMENT] window.Razorpay is undefined after script load`);
+                throw new Error("Payment gateway not initialized correctly.");
+            }
             const razorpayInstance = new window.Razorpay(options);
-
-            razorpayInstance.on('payment.failed', function (response) {
-                console.error('Payment failed:', response.error);
-
-                if (response.error.description?.includes('website does not match registered website(s)')) {
-                    const currentUrl = window.location.origin;
-                    toast.error(`Domain Blocked! You MUST add "${currentUrl}" to Razorpay Dashboard > Settings > Website Settings.`, {
-                        duration: 8000,
-                        icon: '🚫'
-                    });
-                } else {
-                    toast.error(`Payment failed: ${response.error.description}`);
-                }
-                setLoading(false);
-            });
-
             razorpayInstance.open();
 
         } catch (error) {
-            console.error('Payment error:', error);
-            toast.error(error.response?.data?.error || 'Something went wrong with payment');
+            console.error('[PAYMENT] Error:', error);
+            const errorMsg = error.response?.data?.message || error.message || 'Something went wrong with payment';
+            toast.error(errorMsg);
             setLoading(false);
         }
     }, []);

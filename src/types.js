@@ -57,7 +57,7 @@ export const AppRoute = {
 };
 
 // API Base URL
-const API = window._env_?.AISA_BACKEND_API || import.meta.env.AISA_BACKEND_API;
+const API = window._env_?.AISA_BACKEND_API || import.meta.env.VITE_AISA_BACKEND_API;
 
 const apis = {
   resetPassword: `${API}/auth/reset-password-otp`,
@@ -85,6 +85,13 @@ const apis = {
   forgotPassword: `${API}/auth/forgot-password`,
   emailVerificationApi: `${API}/auth/verify-email`,
   resendCode: `${API}/auth/resend-code`,
+  subscription: {
+    status: `${API}/subscription/status`,
+    credits: `${API}/subscription/user-credits`,
+    history: `${API}/subscription/credit-usage-history`,
+    purchase: `${API}/subscription/purchase-plan`,
+    verify: `${API}/subscription/verify-payment`,
+  }
 };
 
 export { API, apis };

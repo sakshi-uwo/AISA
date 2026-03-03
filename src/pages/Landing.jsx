@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     ArrowRight, Bot, Zap, Shield, CircleUser,
@@ -45,6 +45,22 @@ const Landing = () => {
     const [isCookieModalOpen, setIsCookieModalOpen] = useState(false);
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
     const [isProfileSettingsOpen, setIsProfileSettingsOpen] = useState(false);
+    const [processingPlanId, setProcessingPlanId] = useState(null);
+
+    useEffect(() => {
+        if (!paymentLoading) setProcessingPlanId(null);
+    }, [paymentLoading]);
+
+    const toolCosts = [
+        { label: "Normal Chat", cost: "1" },
+        { label: "Deep Search", cost: "10" },
+        { label: "Real-Time Search", cost: "10" },
+        { label: "Generate Image", cost: "20" },
+        { label: "Generate Video", cost: "70" },
+        { label: "Convert Audio", cost: "10" },
+        { label: "Convert Document", cost: "10" },
+        { label: "Code Writer", cost: "5" }
+    ];
 
     const handleLogout = () => {
         localStorage.clear();
@@ -306,22 +322,22 @@ const Landing = () => {
                         Pick the plan that fits your AI needs. From casual usage to full-blown enterprise power.
                     </motion.p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {/* BASIC PLAN */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                        {/* FREE PLAN */}
                         <motion.div
                             variants={item}
                             whileHover={{ y: -6 }}
-                            className="bg-white/30 dark:bg-slate-900/40 backdrop-blur-xl rounded-[2rem] p-5 border border-white/40 dark:border-white/10 shadow-lg hover:shadow-xl relative text-left flex flex-col"
+                            onClick={() => user ? navigate("/dashboard") : navigate("/login")}
+                            className="bg-white/30 dark:bg-slate-900/40 backdrop-blur-xl rounded-[2rem] p-5 border border-white/40 dark:border-white/10 shadow-lg hover:shadow-xl relative text-left flex flex-col cursor-pointer"
                         >
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">BASIC</h3>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">FREE</h3>
                             <div className="text-2xl font-extrabold text-primary mb-4">₹0<span className="text-sm text-gray-500 dark:text-gray-400 font-medium"> / Month</span></div>
                             <ul className="space-y-2.5 mb-5 flex-1 text-[13px]">
                                 {[
-                                    '5 Images + 5 Videos',
-                                    '20 Deep Searches',
-                                    '50 Code Prompts',
-                                    '10 Audio + 15 Doc Convert',
-                                    'Standard AI Response'
+                                    '100 Total Credits',
+                                    'Access to all tools',
+                                    'Standard Support',
+                                    '30 Days Validity'
                                 ].map((feature, idx) => (
                                     <li key={idx} className="flex items-center gap-2.5 text-gray-700 dark:text-gray-300">
                                         <Zap className="w-3.5 h-3.5 text-primary shrink-0" />
@@ -329,11 +345,86 @@ const Landing = () => {
                                     </li>
                                 ))}
                             </ul>
+
+                            {/* Usage Guide */}
+                            <div className="mb-5 p-2.5 rounded-2xl bg-gray-50/50 dark:bg-slate-800/30 border border-gray-200/50 dark:border-white/5">
+                                <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+                                    {toolCosts.slice(0, 8).map((tool, tIdx) => (
+                                        <div key={tIdx} className="flex justify-between items-center text-[9px] text-gray-500 dark:text-gray-400">
+                                            <span className="truncate mr-1">{tool.label}</span>
+                                            <span className="font-bold text-primary shrink-0">{tool.cost} cr.</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
                             <button
-                                onClick={() => navigate("/login")}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    user ? navigate("/dashboard") : navigate("/login");
+                                }}
                                 className="w-full py-2.5 rounded-xl font-bold text-sm border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all duration-300"
                             >
-                                Start Free
+                                {user ? "Go to Dashboard" : "Start Free"}
+                            </button>
+                        </motion.div>
+
+                        {/* STARTER PLAN */}
+                        <motion.div
+                            variants={item}
+                            whileHover={{ y: -6 }}
+                            onClick={() => {
+                                if (user) {
+                                    setProcessingPlanId('STARTER');
+                                    handlePayment('STARTER', user, () => navigate("/dashboard"));
+                                } else {
+                                    navigate("/login");
+                                }
+                            }}
+                            className="bg-white/30 dark:bg-slate-900/40 backdrop-blur-xl rounded-[2rem] p-5 border border-white/40 dark:border-white/10 shadow-lg hover:shadow-xl relative text-left flex flex-col cursor-pointer"
+                        >
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">STARTER</h3>
+                            <div className="text-2xl font-extrabold text-primary mb-4">₹500<span className="text-sm text-gray-500 dark:text-gray-400 font-medium"> / Month</span></div>
+                            <ul className="space-y-2.5 mb-5 flex-1 text-[13px]">
+                                {[
+                                    '500 Total Credits',
+                                    'Faster Tools',
+                                    'Priority Support',
+                                    '30 Days Validity'
+                                ].map((feature, idx) => (
+                                    <li key={idx} className="flex items-center gap-2.5 text-gray-700 dark:text-gray-300">
+                                        <Zap className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                                        <span>{feature}</span>
+                                    </li>
+                                ))}
+                            </ul>
+
+                            {/* Usage Guide */}
+                            <div className="mb-5 p-2.5 rounded-2xl bg-gray-50/50 dark:bg-slate-800/30 border border-gray-200/50 dark:border-white/5">
+                                <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+                                    {toolCosts.slice(0, 8).map((tool, tIdx) => (
+                                        <div key={tIdx} className="flex justify-between items-center text-[9px] text-gray-500 dark:text-gray-400">
+                                            <span className="truncate mr-1">{tool.label}</span>
+                                            <span className="font-bold text-primary shrink-0">{tool.cost} cr.</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (user) {
+                                        setProcessingPlanId('STARTER');
+                                        handlePayment('STARTER', user, () => navigate("/dashboard"));
+                                    } else {
+                                        navigate("/login");
+                                    }
+                                }}
+                                disabled={paymentLoading}
+                                className="w-full py-2.5 rounded-xl font-bold text-sm border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all duration-300"
+                            >
+                                {paymentLoading && processingPlanId === 'STARTER' ? "Processing..." : "Choose Starter"}
                             </button>
                         </motion.div>
 
@@ -341,23 +432,27 @@ const Landing = () => {
                         <motion.div
                             variants={item}
                             whileHover={{ y: -6 }}
-                            className="bg-gradient-to-b from-primary/10 to-primary/5 dark:from-primary/20 dark:to-[#161B2E]/90 backdrop-blur-md rounded-[2rem] p-6 border-2 border-primary shadow-xl relative text-left flex flex-col transform md:-translate-y-2"
+                            onClick={() => {
+                                if (user) {
+                                    setProcessingPlanId('PRO');
+                                    handlePayment('PRO', user, () => navigate("/dashboard"));
+                                } else {
+                                    navigate("/login");
+                                }
+                            }}
+                            className="bg-gradient-to-b from-primary/10 to-primary/5 dark:from-primary/20 dark:to-[#161B2E]/90 backdrop-blur-md rounded-[2rem] p-6 border-2 border-primary shadow-xl relative text-left flex flex-col transform md:-translate-y-2 cursor-pointer"
                         >
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-white text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                                 MOST POPULAR
                             </div>
                             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">PRO</h3>
-                            <div className="text-2xl font-extrabold text-primary mb-4">₹499<span className="text-sm text-gray-500 dark:text-gray-400 font-medium"> / Month</span></div>
+                            <div className="text-2xl font-extrabold text-primary mb-4">₹2850<span className="text-sm text-gray-500 dark:text-gray-400 font-medium"> / Month</span></div>
                             <ul className="space-y-2.5 mb-5 flex-1 text-[13px]">
                                 {[
-                                    '200 Images',
-                                    '20 Videos',
-                                    '200 Deep Searches',
-                                    'Unlimited Code Writer',
-                                    '100 Audio',
-                                    '200 Doc Convert',
-                                    'Full Persistent Contextual Memory',
-                                    'Ad-Free Experience'
+                                    '3,000 Total Credits',
+                                    'Elite AI Models',
+                                    'Instant Support',
+                                    '30 Days Validity'
                                 ].map((feature, idx) => (
                                     <li key={idx} className="flex items-center gap-2.5 text-gray-800 dark:text-gray-200 font-medium">
                                         <Zap className="w-3.5 h-3.5 text-primary shrink-0 fill-primary/20" />
@@ -365,145 +460,155 @@ const Landing = () => {
                                     </li>
                                 ))}
                             </ul>
+
+                            {/* Usage Guide */}
+                            <div className="mb-5 p-2.5 rounded-2xl bg-white/40 dark:bg-primary/10 border border-primary/20">
+                                <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+                                    {toolCosts.slice(0, 8).map((tool, tIdx) => (
+                                        <div key={tIdx} className="flex justify-between items-center text-[9px] text-gray-800 dark:text-gray-200 font-bold">
+                                            <span className="truncate mr-1">{tool.label}</span>
+                                            <span className="font-bold text-primary shrink-0">{tool.cost} cr.</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
                             <button
-                                onClick={() => {
-                                    if (user) setIsUpgradeModalOpen(true);
-                                    else navigate("/login");
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (user) {
+                                        setProcessingPlanId('PRO');
+                                        handlePayment('PRO', user, () => navigate("/dashboard"));
+                                    } else {
+                                        navigate("/login");
+                                    }
                                 }}
+                                disabled={paymentLoading}
                                 className="w-full py-2.5 rounded-xl font-bold text-sm bg-primary text-white shadow-lg shadow-primary/30 hover:opacity-90 transition-all duration-300 transform hover:scale-[1.02]"
                             >
-                                Upgrade to Pro
+                                {paymentLoading && processingPlanId === 'PRO' ? "Processing..." : "Upgrade to Pro"}
                             </button>
                         </motion.div>
 
-                        {/* KING PLAN */}
+                        {/* BUSINESS PLAN */}
                         <motion.div
                             variants={item}
                             whileHover={{ y: -6 }}
-                            className="bg-white/30 dark:bg-slate-900/40 backdrop-blur-xl rounded-[2rem] p-5 border border-white/40 dark:border-white/10 shadow-lg hover:shadow-xl relative text-left flex flex-col"
+                            onClick={() => {
+                                if (user) {
+                                    setProcessingPlanId('BUSINESS');
+                                    handlePayment('BUSINESS', user, () => navigate("/dashboard"));
+                                } else {
+                                    navigate("/login");
+                                }
+                            }}
+                            className="bg-white/30 dark:bg-slate-900/40 backdrop-blur-xl rounded-[2rem] p-5 border border-white/40 dark:border-white/10 shadow-lg hover:shadow-xl relative text-left flex flex-col cursor-pointer"
                         >
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">KING</h3>
-                            <div className="text-2xl font-extrabold text-primary mb-4">₹2,499<span className="text-sm text-gray-500 dark:text-gray-400 font-medium"> / Month</span></div>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">BUSINESS</h3>
+                            <div className="text-2xl font-extrabold text-primary mb-4">₹4500<span className="text-sm text-gray-500 dark:text-gray-400 font-medium"> / Month</span></div>
                             <ul className="space-y-2.5 mb-5 flex-1 text-[13px]">
                                 {[
-                                    'Unlimited Images',
-                                    '200 Videos',
-                                    'Unlimited Deep Search',
-                                    'Unlimited Code Writer',
-                                    'Unlimited Audio + Docs',
-                                    'API Access Enabled',
-                                    'Priority Model Access',
-                                    'Human-in-the-loop Support'
+                                    '5,000 Total Credits',
+                                    'Collaboration Tools',
+                                    'Business Analytics',
+                                    '30 Days Validity'
                                 ].map((feature, idx) => (
                                     <li key={idx} className="flex items-center gap-2.5 text-gray-700 dark:text-gray-300">
-                                        <Zap className="w-3.5 h-3.5 text-purple-500 shrink-0" />
+                                        <Zap className="w-3.5 h-3.5 text-green-500 shrink-0" />
                                         <span>{feature}</span>
                                     </li>
                                 ))}
                             </ul>
+
+                            {/* Usage Guide */}
+                            <div className="mb-5 p-2.5 rounded-2xl bg-gray-50/50 dark:bg-slate-800/30 border border-gray-200/50 dark:border-white/5">
+                                <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+                                    {toolCosts.slice(0, 8).map((tool, tIdx) => (
+                                        <div key={tIdx} className="flex justify-between items-center text-[9px] text-gray-500 dark:text-gray-400">
+                                            <span className="truncate mr-1">{tool.label}</span>
+                                            <span className="font-bold text-primary shrink-0">{tool.cost} cr.</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
                             <button
-                                onClick={() => {
-                                    if (user) setIsUpgradeModalOpen(true);
-                                    else navigate("/login");
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (user) {
+                                        setProcessingPlanId('BUSINESS');
+                                        handlePayment('BUSINESS', user, () => navigate("/dashboard"));
+                                    } else {
+                                        navigate("/login");
+                                    }
                                 }}
+                                disabled={paymentLoading}
+                                className="w-full py-2.5 rounded-xl font-bold text-sm border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all duration-300"
+                            >
+                                {paymentLoading && processingPlanId === 'BUSINESS' ? "Processing..." : "Go Business"}
+                            </button>
+                        </motion.div>
+
+                        {/* ENTERPRISE PLAN */}
+                        <motion.div
+                            variants={item}
+                            whileHover={{ y: -6 }}
+                            onClick={() => {
+                                if (user) {
+                                    setProcessingPlanId('ENTERPRISE');
+                                    handlePayment('ENTERPRISE', user, () => navigate("/dashboard"));
+                                } else {
+                                    navigate("/login");
+                                }
+                            }}
+                            className="bg-white/30 dark:bg-slate-900/40 backdrop-blur-xl rounded-[2rem] p-5 border border-white/40 dark:border-white/10 shadow-lg hover:shadow-xl relative text-left flex flex-col cursor-pointer"
+                        >
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">ENTERPRISE</h3>
+                            <div className="text-2xl font-extrabold text-primary mb-4">₹8000<span className="text-sm text-gray-500 dark:text-gray-400 font-medium"> / Month</span></div>
+                            <ul className="space-y-2.5 mb-5 flex-1 text-[13px]">
+                                {[
+                                    '100,000 Total Credits',
+                                    'Custom Solutions',
+                                    '24/7 Dedicated Support',
+                                    '30 Days Validity'
+                                ].map((feature, idx) => (
+                                    <li key={idx} className="flex items-center gap-2.5 text-gray-700 dark:text-gray-300">
+                                        <Zap className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                                        <span>{feature}</span>
+                                    </li>
+                                ))}
+                            </ul>
+
+                            {/* Usage Guide */}
+                            <div className="mb-5 p-2.5 rounded-2xl bg-gray-50/50 dark:bg-slate-800/30 border border-gray-200/50 dark:border-white/5">
+                                <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+                                    {toolCosts.slice(0, 8).map((tool, tIdx) => (
+                                        <div key={tIdx} className="flex justify-between items-center text-[9px] text-gray-500 dark:text-gray-400">
+                                            <span className="truncate mr-1">{tool.label}</span>
+                                            <span className="font-bold text-primary shrink-0">{tool.cost} cr.</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (user) {
+                                        setProcessingPlanId('ENTERPRISE');
+                                        handlePayment('ENTERPRISE', user, () => navigate("/dashboard"));
+                                    } else {
+                                        navigate("/login");
+                                    }
+                                }}
+                                disabled={paymentLoading}
                                 className="w-full py-2.5 rounded-xl font-bold text-sm bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 transition-all duration-300"
                             >
-                                Go King Mode
+                                {paymentLoading && processingPlanId === 'ENTERPRISE' ? "Processing..." : "Get Enterprise"}
                             </button>
                         </motion.div>
                     </div>
 
-                    {/* Premium Launch Offer Card (Wide / Horizontal / Compact) */}
-                    <motion.div
-                        variants={item}
-                        className="relative mt-16 max-w-4xl mx-auto w-full group mb-10"
-                    >
-                        {/* Soft Glow Background */}
-                        <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/30 via-purple-600/30 to-pink-600/30 rounded-[2rem] blur-xl opacity-50 group-hover:opacity-80 transition duration-700 animate-pulse"></div>
-                        
-                        <div className="relative bg-white/30 dark:bg-slate-900/40 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-[2rem] p-5 md:p-7 shadow-xl flex flex-col lg:flex-row items-center justify-between gap-6 transform transition duration-500 hover:-translate-y-1">
-                            
-                            {/* Left Section: Price & Badge */}
-                            <div className="flex flex-col items-center lg:items-start text-center lg:text-left flex-shrink-0">
-                                {/* Top Badge */}
-                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 font-bold text-xs mb-3 animate-pulse">
-                                    🔥 Limited Time Offer
-                                </div>
-
-                                {/* Price Section */}
-                                <div className="relative">
-                                    <h3 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tight mb-1 flex items-baseline gap-1.5">
-                                        ₹4,999 <span className="text-xl md:text-2xl font-bold text-gray-500 dark:text-gray-400">/ Year</span>
-                                    </h3>
-                                    <p className="text-gray-600 dark:text-gray-400 font-medium mb-2 text-sm">
-                                        Only <span className="font-bold text-gray-900 dark:text-white">₹417/month</span> billed yearly
-                                    </p>
-                                    <div className="inline-block px-2.5 py-1 bg-green-500/10 text-green-700 dark:text-green-400 font-bold text-xs rounded-lg border border-green-500/20 shadow-sm">
-                                        Save ₹2,000 Instantly
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Middle Section: Vertical Divider (Desktop) / Horizontal (Mobile) */}
-                            <div className="hidden lg:block w-px h-24 bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-700 to-transparent"></div>
-                            <div className="block lg:hidden w-full h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-700 to-transparent my-1"></div>
-
-                            {/* Middle/Right: Benefits list */}
-                            <div className="flex-1 w-full flex justify-center lg:justify-start lg:pl-2">
-                                <ul className="text-left space-y-3">
-                                    {[
-                                        "2 Months FREE",
-                                        "20% Lifetime Discount",
-                                        "Founder’s Club Access"
-                                    ].map((benefit, i) => (
-                                        <li key={i} className="flex items-center justify-start gap-2.5 text-gray-800 dark:text-gray-200 font-semibold text-sm">
-                                            <div className="flex-shrink-0 w-5 h-5 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white flex items-center justify-center shadow-md shadow-purple-500/20">
-                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
-                                            </div>
-                                            {benefit}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-
-                            {/* Right Section: Scarcity & CTA */}
-                            <div className="flex flex-col w-full lg:w-auto flex-shrink-0 min-w-[240px]">
-                                {/* Scarcity / Progress */}
-                                <div className="w-full mb-4 bg-white/40 dark:bg-gray-800/40 rounded-xl p-3 border border-white/50 dark:border-gray-700/50 backdrop-blur-sm">
-                                    <div className="flex justify-between items-center mb-2 text-xs font-bold text-gray-900 dark:text-white">
-                                        <span className="flex items-center gap-1"><span className="animate-bounce">🔥</span> 73/100 Seats</span>
-                                        <span className="text-red-500 dark:text-red-400 animate-pulse uppercase tracking-wider">Almost Full!</span>
-                                    </div>
-                                    <div className="w-full h-1.5 bg-gray-200/50 dark:bg-gray-700/50 rounded-full overflow-hidden shadow-inner">
-                                        <div className="h-full bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 rounded-full w-[73%] relative">
-                                            <div className="absolute inset-0 bg-white/20 animate-[run_2s_infinite]"></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* CTA Button */}
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (user) {
-                                            handlePayment({ name: 'king_yearly', price: 4999 }, user, () => {
-                                                navigate("/dashboard");
-                                            });
-                                        } else {
-                                            navigate("/login");
-                                        }
-                                    }}
-                                    disabled={paymentLoading}
-                                    className="relative w-full group/btn"
-                                >
-                                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl blur opacity-60 group-hover/btn:opacity-100 transition duration-300"></div>
-                                    <div className="relative w-full px-5 py-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl text-white font-bold text-base shadow-lg transform transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 border border-white/20">
-                                        {paymentLoading ? "Processing..." : "🚀 Claim My Spot"}
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
-                    </motion.div>
                 </motion.div>
 
 

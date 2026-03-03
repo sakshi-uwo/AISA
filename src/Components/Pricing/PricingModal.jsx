@@ -1,174 +1,210 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, X, Crown, Zap, Shield, Sparkles, Loader } from 'lucide-react';
-import UsageStats from '../Subscription/UsageStats';
+import { X, Check, Zap, Rocket, Briefcase, Building, Loader, Sparkles } from 'lucide-react';
 import { useSubscription } from '../../context/SubscriptionContext';
+import usePayment from '../../hooks/usePayment';
+import { getUserData } from '../../userStore/userData';
+import { useNavigate } from 'react-router-dom';
 
-const PricingModal = ({ onClose, currentPlan, onUpgrade, loading }) => {
+const PricingModal = ({ onClose }) => {
+    const { refreshSubscription } = useSubscription();
+    const { handlePayment, loading } = usePayment();
+    const navigate = useNavigate();
+    const user = getUserData();
     const [processingPlanId, setProcessingPlanId] = useState(null);
 
     useEffect(() => {
         if (!loading) setProcessingPlanId(null);
     }, [loading]);
+
+    const toolCosts = [
+        { label: "Normal Chat", cost: "1" },
+        { label: "Deep Search", cost: "10" },
+        { label: "Real-Time Search", cost: "10" },
+        { label: "Generate Image", cost: "20" },
+        { label: "Generate Video", cost: "70" },
+        { label: "Convert Audio", cost: "10" },
+        { label: "Convert Document", cost: "10" },
+        { label: "Code Writer", cost: "5" }
+    ];
+
     const plans = [
         {
-            id: 'basic',
-            name: 'Basic',
-            price: 0,
-            description: 'Essential AI for everyday use',
+            name: "FREE",
+            price: "₹0",
+            credits: 100,
             features: [
-                'Access to standard models',
-                'Basic response speed',
-                'Standard support',
-                'Limited daily queries'
+                "100 Total Credits",
+                "Access to all tools",
+                "Standard Support",
+                "30 Days Validity"
             ],
-            icon: Shield,
-            color: 'bg-gray-100 dark:bg-zinc-800',
-            textColor: 'text-gray-900 dark:text-white',
-            borderColor: 'border-gray-200 dark:border-zinc-700'
+            color: "from-gray-400 to-gray-600",
+            bestFor: "Trial",
+            icon: <Zap className="w-5 h-5 text-gray-500" />
         },
         {
-            id: 'pro',
-            name: 'Pro',
-            price: 499,
-            originalPrice: 999,
-            offer: '50% OFF',
-            description: 'Advanced capabilities for professionals',
+            name: "STARTER",
+            price: "₹500",
+            credits: 500,
+            icon: <Rocket className="w-5 h-5 text-blue-500" />,
             features: [
-                'Access to advanced models',
-                'Fast response speed',
-                'Priority support',
-                'Unlimited queries',
-                'Image generation'
+                "500 Total Credits",
+                "Advanced AI Models",
+                "Priority Support",
+                "Valid for 30 days"
             ],
-            icon: Zap,
-            color: 'bg-blue-50 dark:bg-blue-900/20',
-            textColor: 'text-blue-600 dark:text-blue-400',
-            borderColor: 'border-blue-200 dark:border-blue-800'
+            color: "from-blue-600 to-indigo-600",
+            bestFor: "Casual use"
         },
         {
-            id: 'king',
-            name: 'King',
-            price: 2499,
-            originalPrice: 4999,
-            offer: '50% OFF',
-            description: 'Ultimate power for power users',
+            name: "PRO",
+            price: "₹2700",
+            credits: 30000,
+            featured: true,
+            icon: <Zap className="w-5 h-5 text-purple-500" />,
             features: [
-                'Access to all models (including Beta)',
-                'Instant response speed',
-                '24/7 Dedicated support',
-                'Unlimited everything',
-                'Early access to new features',
-                'API Access'
+                "30,000 Total Credits",
+                "Fastest Response Time",
+                "Premium Features",
+                "Valid for 30 days"
             ],
-            icon: Crown,
-            color: 'bg-amber-50 dark:bg-amber-900/20',
-            textColor: 'text-amber-600 dark:text-amber-400',
-            borderColor: 'border-amber-200 dark:border-amber-800'
+            color: "from-purple-600 to-pink-600",
+            bestFor: "Power users"
+        },
+        {
+            name: "BUSINESS",
+            price: "₹4500",
+            credits: 50000,
+            icon: <Briefcase className="w-5 h-5 text-green-500" />,
+            features: [
+                "5,000 Total Credits",
+                "Team Collaboration",
+                "Business Analytics",
+                "Valid for 30 days"
+            ],
+            color: "from-green-600 to-teal-600",
+            bestFor: "Small teams"
+        },
+        {
+            name: "ENTERPRISE",
+            price: "₹8000",
+            credits: 100000,
+            icon: <Building className="w-5 h-5 text-amber-500" />,
+            features: [
+                "100,000 Total Credits",
+                "Custom Integration",
+                "Dedicated Support",
+                "Valid for 30 days"
+            ],
+            color: "from-amber-500 to-orange-600",
+            bestFor: "Large Scale"
         }
     ];
 
     return (
         <AnimatePresence>
-            <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={onClose}>
+            <div className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-4 overflow-y-auto bg-black/60 backdrop-blur-md">
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    onClick={(e) => e.stopPropagation()}
-                    className="bg-white dark:bg-[#18181b] w-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]"
+                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                    className="relative w-full max-w-7xl bg-white dark:bg-[#121212] border border-white/20 dark:border-white/10 rounded-[2.5rem] shadow-2xl flex flex-col max-h-[92vh] overflow-hidden"
                 >
-                    <div className="p-4 sm:p-6 border-b border-gray-100 dark:border-white/10 flex justify-between items-center shrink-0">
+                    <div className="p-6 border-b border-gray-100 dark:border-white/10 flex justify-between items-center bg-white/50 dark:bg-black/20 backdrop-blur-md shrink-0">
                         <div>
-                            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Upgrade your Plan</h2>
-                            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Choose the plan that fits your needs.</p>
+                            <h2 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                                Upgrade Your Power Level <Sparkles className="w-5 h-5 text-primary animate-pulse" />
+                            </h2>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Choose the plan that fits your AI needs perfectly.</p>
                         </div>
                         <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full transition-colors">
-                            <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
+                            <X className="w-6 h-6 text-gray-500" />
                         </button>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-gray-50 dark:bg-[#121212] custom-scrollbar">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {plans.map((plan) => {
-                                const isCurrent = currentPlan?.toLowerCase() === plan.id;
-                                const Icon = plan.icon;
-
-                                return (
-                                    <div
-                                        key={plan.id}
-                                        className={`relative bg-white dark:bg-[#1f1f1f] rounded-2xl p-6 border-2 transition-all duration-300 hover:shadow-xl flex flex-col ${isCurrent ? 'border-primary ring-2 ring-primary/20' : 'border-transparent hover:border-gray-200 dark:hover:border-zinc-700'}`}
-                                    >
-                                        {plan.offer && (
-                                            <div className="absolute top-4 right-4 bg-green-500/10 text-green-600 dark:text-green-400 text-[10px] font-bold px-2 py-1 rounded-lg uppercase tracking-wider">
-                                                {plan.offer}
-                                            </div>
-                                        )}
-
-                                        {isCurrent && (
-                                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-                                                Current Plan
-                                            </div>
-                                        )}
-
-                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${plan.color}`}>
-                                            <Icon className={`w-6 h-6 ${plan.textColor}`} />
+                    <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
+                            {plans.map((p, idx) => (
+                                <motion.div
+                                    key={idx}
+                                    whileHover={{ y: -5 }}
+                                    className={`relative p-5 rounded-3xl border-2 flex flex-col transition-all duration-300
+                                        ${p.featured
+                                            ? 'border-primary bg-primary/5 shadow-xl shadow-primary/10'
+                                            : 'border-gray-100 dark:border-white/5 bg-white/30 dark:bg-[#1a1a1a]/50 backdrop-blur-sm'
+                                        }`}
+                                >
+                                    {p.featured && (
+                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-wider whitespace-nowrap z-10">
+                                            Most Popular
                                         </div>
+                                    )}
 
-                                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{plan.name}</h3>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 min-h-[40px]">{plan.description}</p>
-
-                                        {plan.offer && (
-                                            <div className="text-[11px] font-bold text-blue-500 dark:text-blue-400 mb-1 flex items-center gap-1.5 uppercase tracking-wide">
-                                                <Sparkles className="w-3 h-3" />
-                                                {plan.offer} Launching Offer
-                                            </div>
-                                        )}
-
-                                        <div className="mb-6 flex items-baseline gap-2">
-                                            <div className="flex flex-col">
-                                                {plan.originalPrice && (
-                                                    <span className="text-sm text-gray-400 line-through font-medium">₹{plan.originalPrice}</span>
-                                                )}
-                                                <div className="flex items-baseline">
-                                                    <span className="text-3xl font-bold text-gray-900 dark:text-white">₹{plan.price}</span>
-                                                    <span className="text-gray-500 dark:text-gray-400 ml-1">/month</span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <ul className="space-y-3 mb-8 flex-1">
-                                            {plan.features.map((feature, i) => (
-                                                <li key={i} className="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-300">
-                                                    <Check className={`w-5 h-5 shrink-0 ${plan.textColor}`} />
-                                                    <span className="leading-tight">{feature}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-
-                                        <button
-                                            onClick={() => {
-                                                if (!isCurrent) {
-                                                    setProcessingPlanId(plan.id);
-                                                    onUpgrade(plan);
-                                                }
-                                            }}
-                                            disabled={isCurrent || loading}
-                                            className={`w-full py-3 rounded-xl font-bold text-sm transition-all shadow-sm flex items-center justify-center gap-2 ${isCurrent
-                                                ? 'bg-gray-100 dark:bg-zinc-800 text-gray-400 cursor-not-allowed'
-                                                : 'bg-primary hover:bg-primary/90 text-white hover:shadow-primary/25 hover:scale-[1.02] active:scale-[0.98]'
-                                                }`}
-                                        >
-                                            {(loading && processingPlanId === plan.id) ? (
-                                                <Loader className="w-5 h-5 animate-spin" />
-                                            ) : (
-                                                isCurrent ? 'Current Plan' : plan.price === 0 ? 'Downgrade' : 'Upgrade'
-                                            )}
-                                        </button>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 shadow-sm">{p.icon}</div>
+                                        <span className="text-[9px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">{p.bestFor}</span>
                                     </div>
-                                );
-                            })}
+
+                                    <h3 className="text-lg font-extrabold text-gray-900 dark:text-white mb-1 uppercase tracking-tight">{p.name}</h3>
+                                    <div className="flex items-baseline gap-1 mb-4">
+                                        <span className="text-2xl font-black text-primary">{p.price}</span>
+                                        <span className="text-gray-500 dark:text-gray-400 text-xs font-medium">/month</span>
+                                    </div>
+
+                                    <ul className="space-y-2.5 mb-4 flex-1">
+                                        {p.features.map((f, fIdx) => (
+                                            <li key={fIdx} className="flex items-start gap-2.5 text-[12px] text-gray-700 dark:text-gray-300 leading-tight">
+                                                <Check className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                                                <span>{f}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+
+                                    {/* Credit Usage Guide Section */}
+                                    <div className={`mb-5 p-2.5 rounded-2xl border ${p.featured ? 'bg-primary/10 border-primary/20' : 'bg-gray-50 dark:bg-black/20 border-gray-200 dark:border-white/5'}`}>
+                                        <h4 className={`text-[9px] font-black uppercase tracking-widest mb-2 text-center opacity-70 ${p.featured ? 'text-primary' : 'text-gray-400'}`}>Usage Guide</h4>
+                                        <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+                                            {toolCosts.map((tool, tIdx) => (
+                                                <div key={tIdx} className="flex justify-between items-center text-[8px] font-bold text-gray-500 dark:text-gray-400">
+                                                    <span className="truncate mr-1">{tool.label}</span>
+                                                    <span className="text-primary shrink-0">{tool.cost} cr.</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        disabled={loading}
+                                        onClick={() => {
+                                            if (!user) {
+                                                navigate('/login');
+                                                onClose();
+                                                return;
+                                            }
+                                            setProcessingPlanId(p.name);
+                                            handlePayment(p.name, user, () => {
+                                                onClose();
+                                                refreshSubscription();
+                                            });
+                                        }}
+                                        className={`w-full py-3.5 rounded-2xl font-black text-xs transition-all duration-300
+                                            transform active:scale-95 bg-gradient-to-r uppercase tracking-widest
+                                            ${p.featured ? 'from-primary to-blue-600 text-white shadow-lg shadow-primary/20' : 'from-gray-800 to-black dark:from-white dark:to-gray-200 text-white dark:text-black'}
+                                            hover:opacity-90 flex items-center justify-center gap-2`}
+                                    >
+                                        {(loading && processingPlanId === p.name)
+                                            ? <Loader className="w-4 h-4 animate-spin" />
+                                            : `Get ${p.name}`
+                                        }
+                                    </button>
+                                </motion.div>
+                            ))}
                         </div>
+                    </div>
+
+                    <div className="p-4 bg-gray-50 dark:bg-black/20 text-center border-t border-gray-100 dark:border-white/10 shrink-0">
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">AISA Intelligence System • Secure Payments via Razorpay</p>
                     </div>
                 </motion.div>
             </div>

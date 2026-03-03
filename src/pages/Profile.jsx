@@ -32,6 +32,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import toast from 'react-hot-toast';
 import MemoryManager from '../Components/MemoryManager';
+import { useSubscription } from '../context/SubscriptionContext';
 
 const Profile = () => {
     const navigate = useNavigate();
@@ -315,13 +316,13 @@ const Profile = () => {
 
     const getNativeName = (lang) => nativeLanguageNames[lang] || lang;
 
-    const [tglState, setTglState] = useRecoilState(toggleState);
+    const { plan_name, remaining_credits, total_credits, usageHistory } = useSubscription();
 
     const stats = [
-        { label: t('totalSessions'), value: '128', icon: Clock, color: 'bg-blue-500/10 text-blue-600' },
-        { label: 'Current Plan', value: user?.plan || 'Basic', icon: Star, color: 'bg-sky-400/10 text-sky-600', clickable: true },
+        { label: t('totalSessions'), value: usageHistory?.length || '0', icon: Clock, color: 'bg-blue-500/10 text-blue-600' },
+        { label: 'Current Plan', value: plan_name || 'FREE', icon: Star, color: 'bg-sky-400/10 text-sky-600', clickable: true },
         { label: t('accountSettings'), value: 'Configured', icon: Settings2, color: 'bg-purple-500/10 text-purple-600' },
-        { label: t('credits'), value: <Infinity className="w-5 h-5" />, icon: Shield, color: 'bg-green-500/10 text-green-600' }
+        { label: t('credits'), value: `${remaining_credits} / ${total_credits}`, icon: Shield, color: 'bg-green-500/10 text-green-600' }
     ];
 
     const preferenceItems = [

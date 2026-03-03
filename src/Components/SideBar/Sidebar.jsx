@@ -467,7 +467,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                         <span
                           onClick={(e) => {
                             e.stopPropagation();
-                            setShowPricingModal(true);
+                            setIsUpgradeModalOpen(true);
                           }}
                           className={`px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-tighter shrink-0 cursor-pointer hover:scale-110 transition-transform ${user.plan === 'King'
                             ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-sm'
@@ -683,22 +683,6 @@ const Sidebar = ({ isOpen, onClose }) => {
         />
       )}
 
-      <AnimatePresence>
-        {showPricingModal && (
-          <PricingModal
-            currentPlan={user?.plan}
-            loading={paymentLoading}
-            onClose={() => setShowPricingModal(false)}
-            onUpgrade={async (p) => {
-              await handlePayment(p, user, (u) => {
-                setUserRecoil(prev => ({ ...prev, user: { ...prev.user, plan: u.plan } }));
-                setUserData({ ...getUserData(), plan: u.plan });
-                setShowPricingModal(false);
-              });
-            }}
-          />
-        )}
-      </AnimatePresence>
     </>
   );
 };

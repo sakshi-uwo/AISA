@@ -2,35 +2,34 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import axios from 'axios';
 import { getUserData } from '../userStore/userData';
 import { apis } from '../types';
+import toast from 'react-hot-toast';
 
 const SubscriptionContext = createContext();
 
+// Minimum credits required per feature
+const FEATURE_CREDIT_COSTS = {
+    chat: 1,
+    deepSearch: 10,
+    webSearch: 10,
+    image: 20,
+    video: 70,
+    audio: 10,
+    document: 10,
+    codeWriter: 5,
+};
+
 export const SubscriptionProvider = ({ children }) => {
     const [subscription, setSubscription] = useState({
-        plan: 'basic',
-        planLimits: {
-            imageCount: 5,
-            videoCount: 5,
-            deepSearchCount: 20,
-            audioConvertCount: 10,
-            documentConvertCount: 15,
-            codeWriterCount: 50,
-            chatCount: 100
-        },
-        usage: {
-            imageCount: 0,
-            videoCount: 0,
-            deepSearchCount: 0,
-            audioConvertCount: 0,
-            documentConvertCount: 0,
-            codeWriterCount: 0,
-            chatCount: 0
-        },
-        isActive: true,
+        plan_name: 'FREE',
+        remaining_credits: 0,
+        total_credits: 0,
+        expiry_date: null,
+        status: 'active',
         loading: true
     });
 
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+    const [usageHistory, setUsageHistory] = useState([]);
 
     const fetchSubscriptionStatus = useCallback(async () => {
         const user = getUserData();
@@ -40,18 +39,23 @@ export const SubscriptionProvider = ({ children }) => {
         }
 
         try {
-            const response = await axios.get(`${apis.user}/subscription`, {
+            const response = await axios.get(apis.subscription.status, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
-            if (response.data) {
-                setSubscription(prev => ({
-                    ...prev,
-                    ...response.data,
-                    // Ensure usage and planLimits are present if data is missing them
-                    usage: response.data.usage || prev.usage,
-                    planLimits: response.data.planLimits || prev.planLimits,
+            if (response.data && response.data.success) {
+                setSubscription({
+                    ...response.data.subscription,
                     loading: false
-                }));
+                });
+
+                // Check for low credits warning (less than 10%)
+                const sub = response.data.subscription;
+                if (sub.remaining_credits > 0 && sub.remaining_credits < (sub.total_credits * 0.1)) {
+                    toast("Your credits are running low.", {
+                        icon: '⚠️',
+                        duration: 5000,
+                    });
+                }
             }
         } catch (error) {
             console.error("Error fetching subscription:", error);
@@ -59,47 +63,54 @@ export const SubscriptionProvider = ({ children }) => {
         }
     }, []);
 
+    const fetchUsageHistory = useCallback(async () => {
+        const user = getUserData();
+        if (!user || !user.token) return;
+
+        try {
+            const response = await axios.get(apis.subscription.history, {
+                headers: { Authorization: `Bearer ${user.token}` }
+            });
+            if (response.data && response.data.success) {
+                setUsageHistory(response.data.history);
+            }
+        } catch (error) {
+            console.error("Error fetching usage history:", error);
+        }
+    }, []);
+
     useEffect(() => {
         fetchSubscriptionStatus();
-    }, [fetchSubscriptionStatus]);
+        fetchUsageHistory();
+    }, [fetchSubscriptionStatus, fetchUsageHistory]);
 
-    // Function to check limit on frontend before calling API
-    // -1 from backend means "unlimited" (Infinity can't be JSON serialised)
-    const checkLimitLocally = (feature) => {
-        const { usage, planLimits } = subscription;
-        if (!usage || !planLimits) return true; // Fail safe — allow if data missing
+    /**
+     * Check if user has enough credits for a feature locally (no API call).
+     * Returns true if allowed, false if not (and opens upgrade modal).
+     */
+    const checkLimitLocally = useCallback((feature) => {
+        const cost = FEATURE_CREDIT_COSTS[feature] || 1;
+        const remaining = subscription.remaining_credits || 0;
 
-        const keyMap = {
-            'image': 'imageCount',
-            'video': 'videoCount',
-            'deepSearch': 'deepSearchCount',
-            'audio': 'audioConvertCount',
-            'document': 'documentConvertCount',
-            'codeWriter': 'codeWriterCount',
-            'chat': 'chatCount'
-        };
-        const key = keyMap[feature] || feature;
-        const limit = planLimits[key];
-
-        // -1 or Infinity or missing = unlimited — never block
-        if (limit === undefined || limit === null || limit === -1 || limit === Infinity) {
-            return true;
-        }
-
-        if (usage[key] >= limit) {
+        if (remaining < cost) {
             setIsUpgradeModalOpen(true);
+            toast.error(`Insufficient credits for ${feature}. Please upgrade your plan.`, {
+                duration: 3000,
+            });
             return false;
         }
         return true;
-    };
+    }, [subscription.remaining_credits]);
 
     return (
         <SubscriptionContext.Provider value={{
             ...subscription,
+            usageHistory,
             isUpgradeModalOpen,
             setIsUpgradeModalOpen,
+            refreshSubscription: fetchSubscriptionStatus,
+            refreshHistory: fetchUsageHistory,
             checkLimitLocally,
-            refreshSubscription: fetchSubscriptionStatus
         }}>
             {children}
         </SubscriptionContext.Provider>

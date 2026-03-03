@@ -80,6 +80,7 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
     useEffect(() => {
         if (activeTab === 'account' && user?.token) {
             fetchTransactions();
+            refreshSubscription(); // Force refresh subscription system data
 
             // Sync user profile to ensure plan is up to date
             axios.get(apis.user, {
@@ -91,7 +92,7 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
                 }
             }).catch(err => console.error("Profile sync failed", err));
         }
-    }, [activeTab]);
+    }, [activeTab, user?.token, refreshSubscription]);
 
     const fetchTransactions = async () => {
         try {
@@ -437,7 +438,7 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
                             <p className="font-bold text-[16px] capitalize text-primary">{user?.plan || 'Basic'} Plan</p>
                             <p className="text-[11px] text-gray-500">Your current subscription</p>
                         </div>
-                        <button onClick={() => setShowPricingModal(true)} className="px-5 py-2.5 bg-primary text-white text-[12px] font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-105 transition-transform active:scale-95 whitespace-nowrap">Upgrade Plan</button>
+                        <button onClick={() => setIsUpgradeModalOpen(true)} className="px-5 py-2.5 bg-primary text-white text-[12px] font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-105 transition-transform active:scale-95 whitespace-nowrap">Upgrade Plan</button>
                     </div>
 
                     {/* Integrated Usage Stats Card */}
@@ -806,22 +807,6 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
                         </div>
                     </motion.div>
                 </div>
-            )}
-            {showPricingModal && (
-                <PricingModal
-                    key="pricing-modal"
-                    currentPlan={user?.plan}
-                    loading={paymentLoading}
-                    onClose={() => setShowPricingModal(false)}
-                    onUpgrade={async p => {
-                        await handlePayment(p, user, u => {
-                            setUserRecoil(prev => ({ ...prev, user: { ...prev.user, plan: u.plan } }));
-                            setUserData({ ...getUserData(), plan: u.plan });
-                            setShowPricingModal(false);
-                            refreshSubscription();
-                        });
-                    }}
-                />
             )}
             {showResetModal && (
                 <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowResetModal(false)}>
