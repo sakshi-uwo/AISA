@@ -98,6 +98,18 @@ const SecurityAndGuidelines = () => {
                         <h4 className="font-semibold text-maintext text-sm mb-1">4.2 Reliability Disclaimer</h4>
                         <p className="text-xs text-subtext">Users acknowledge that A-Series™ shall not be held responsible for decisions or outcomes arising from reliance on AI-generated content, including legal, financial, or medical decisions.</p>
                     </div>
+                    <div className="bg-surface/50 p-3 rounded-lg border border-border">
+                        <h4 className="font-semibold text-maintext text-sm mb-1">4.3 AI Usage Policy</h4>
+                        <p className="text-xs text-subtext">AISA AI tools must not be used for illegal activities. Users must not generate harmful, misleading, abusive, or discriminatory content using AI features.</p>
+                    </div>
+                    <div className="bg-surface/50 p-3 rounded-lg border border-border">
+                        <h4 className="font-semibold text-maintext text-sm mb-1">4.4 Review Before Public Use</h4>
+                        <p className="text-xs text-subtext">AI-generated outputs should be reviewed and verified by users before any public use, publication, or professional reliance. Users are solely responsible for content they publish.</p>
+                    </div>
+                    <div className="bg-surface/50 p-3 rounded-lg border border-border">
+                        <h4 className="font-semibold text-maintext text-sm mb-1">4.5 Usage Restrictions</h4>
+                        <p className="text-xs text-subtext">AISA™ reserves the right to restrict, suspend, or terminate access for any usage that violates ethical standards, legal requirements, or these guidelines.</p>
+                    </div>
                 </div>
             )
         },
@@ -194,7 +206,7 @@ const SecurityAndGuidelines = () => {
                     </div>
                     <div>
                         <h1 className="text-2xl font-bold text-maintext">Security & Guidelines</h1>
-                        <p className="text-xs text-subtext">Last Updated: 17/12/2025</p>
+                        <p className="text-xs text-subtext">Last Updated: 07/03/2026</p>
                     </div>
                 </div>
             </header>

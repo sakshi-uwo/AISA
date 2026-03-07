@@ -167,14 +167,14 @@ const CookiePolicy = () => {
                     <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-purple-500/10 mb-6">
                         <Cookie className="w-10 h-10 text-purple-600 dark:text-purple-400" />
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-maintext mb-4">
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-4">
                         Cookie Policy
                     </h1>
-                    <p className="text-lg text-subtext max-w-2xl mx-auto">
+                    <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
                         Learn how we use cookies and similar technologies to enhance your experience.
                     </p>
-                    <p className="text-sm text-subtext mt-4">
-                        <strong>Last Updated:</strong> January 22, 2026
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
+                        <strong className="text-gray-700 dark:text-gray-200">Last Updated:</strong> March 7, 2026
                     </p>
                 </motion.div>
 
@@ -185,10 +185,10 @@ const CookiePolicy = () => {
                     transition={{ delay: 0.1 }}
                     className="bg-white dark:bg-slate-900 rounded-2xl p-8 mb-8 border border-border shadow-sm"
                 >
-                    <p className="text-maintext leading-relaxed mb-4">
+                    <p className="text-gray-800 dark:text-gray-200 leading-relaxed mb-4">
                         This Cookie Policy explains how {name}™ uses cookies and similar technologies to recognize you when you visit our platform. It explains what these technologies are, why we use them, and your rights to control their use.
                     </p>
-                    <p className="text-maintext leading-relaxed">
+                    <p className="text-gray-800 dark:text-gray-200 leading-relaxed">
                         By continuing to use {name}™, you consent to our use of cookies in accordance with this policy. You can change your cookie preferences at any time through your browser or account settings.
                     </p>
                 </motion.div>
@@ -208,15 +208,15 @@ const CookiePolicy = () => {
                                     <section.icon className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                                 </div>
                                 <div className="flex-1">
-                                    <h2 className="text-2xl font-bold text-maintext mb-4">{section.title}</h2>
+                                    <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white">{section.title}</h2>
                                 </div>
                             </div>
 
                             <div className="space-y-6 ml-16">
                                 {section.content.map((item, idx) => (
-                                    <div key={idx}>
-                                        <h3 className="text-lg font-semibold text-maintext mb-2">{item.subtitle}</h3>
-                                        <p className="text-subtext leading-relaxed">{item.text}</p>
+                                    <div key={idx} className="border-l-2 border-purple-400/50 pl-4">
+                                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">{item.subtitle}</h3>
+                                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{item.text}</p>
                                     </div>
                                 ))}
                             </div>
@@ -234,14 +234,14 @@ const CookiePolicy = () => {
                     transition={{ delay: 0.9 }}
                     className="mt-12 bg-gradient-to-r from-purple-500/5 to-pink-500/5 rounded-2xl p-8 border border-purple-500/20"
                 >
-                    <h2 className="text-2xl font-bold text-maintext mb-4">Questions About Cookies?</h2>
-                    <p className="text-subtext leading-relaxed mb-4">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Questions About Cookies?</h2>
+                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
                         If you have questions about our use of cookies or this policy, please contact us:
                     </p>
-                    <div className="space-y-2 text-subtext">
-                        <p><strong className="text-maintext">Email:</strong> <a href="mailto:admin@uwo24.com" className="text-primary hover:underline">admin@uwo24.com</a></p>
-                        <p><strong className="text-maintext">Phone:</strong> <a href="tel:+918359890909" className="text-primary hover:underline">+91 83589 90909</a></p>
-                        <p><strong className="text-maintext">Address:</strong> Jabalpur, Madhya Pradesh, India</p>
+                    <div className="space-y-2 text-gray-700 dark:text-gray-300">
+                        <p><strong className="text-gray-900 dark:text-white">Email:</strong> <a href="mailto:admin@uwo24.com" className="text-primary hover:underline">admin@uwo24.com</a></p>
+                        <p><strong className="text-gray-900 dark:text-white">Phone:</strong> <a href="tel:+918359890909" className="text-primary hover:underline">+91 83589 90909</a></p>
+                        <p><strong className="text-gray-900 dark:text-white">Address:</strong> Jabalpur, Madhya Pradesh, India</p>
                     </div>
                 </motion.div>
 
@@ -252,8 +252,8 @@ const CookiePolicy = () => {
                     transition={{ delay: 1.0 }}
                     className="mt-8 p-6 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-xl"
                 >
-                    <h3 className="text-lg font-semibold text-maintext mb-2">Policy Updates</h3>
-                    <p className="text-sm text-subtext leading-relaxed">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Policy Updates</h3>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                         We may update this Cookie Policy periodically to reflect changes in our practices or legal requirements. We will notify you of significant changes by posting a notice on our platform or via email.
                     </p>
                 </motion.div>

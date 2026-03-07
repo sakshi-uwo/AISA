@@ -24,6 +24,7 @@ const Signup = () => {
   const [error, setError] = useState(null);
   const [passwordError, setPasswordError] = useState(null);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -209,13 +210,33 @@ const Signup = () => {
                 </button>
               </div>
 
+              {/* Terms Agreement Checkbox */}
+              <div className="flex items-start gap-3 mt-2 px-1">
+                <input
+                  type="checkbox"
+                  id="terms-agree"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="mt-1 w-4 h-4 accent-primary rounded border-slate-300 cursor-pointer shrink-0"
+                />
+                <label htmlFor="terms-agree" className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed cursor-pointer select-none">
+                  I agree to the{' '}
+                  <Link to="/terms" className="text-primary hover:underline font-semibold">Terms of Service</Link>,{' '}
+                  <Link to="/privacy-policy" className="text-primary hover:underline font-semibold">Privacy Policy</Link>, and{' '}
+                  <Link to="/cookie-policy" className="text-primary hover:underline font-semibold">Cookie Policy</Link>
+                </label>
+              </div>
+
               {/* Signup Button - Vibrant Blue Style */}
               <motion.button
-                whileHover={{ y: -5, scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={agreedToTerms ? { y: -5, scale: 1.02 } : {}}
+                whileTap={agreedToTerms ? { scale: 0.98 } : {}}
                 type="submit"
-                disabled={isLoading}
-                className="w-full py-4 bg-primary rounded-2xl font-bold text-lg text-white shadow-xl shadow-primary/30 transition-all duration-300 flex items-center justify-center gap-2 mt-4 disabled:opacity-50"
+                disabled={isLoading || !agreedToTerms}
+                className={`w-full py-4 rounded-2xl font-bold text-lg text-white shadow-xl transition-all duration-300 flex items-center justify-center gap-2 mt-4 ${agreedToTerms
+                    ? 'bg-primary shadow-primary/30 hover:shadow-primary/40 cursor-pointer'
+                    : 'bg-slate-300 dark:bg-slate-700 shadow-none cursor-not-allowed opacity-60'
+                  }`}
               >
                 {isLoading ? (
                   <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -237,8 +258,11 @@ const Signup = () => {
               type="button"
               whileTap={{ scale: 0.98 }}
               onClick={() => { console.log('[Google Signup] Button clicked'); googleLogin(); }}
-              disabled={googleLoading}
-              className="w-full py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-700 dark:text-white shadow-md transition-all flex items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50"
+              disabled={googleLoading || !agreedToTerms}
+              className={`w-full py-4 border rounded-2xl font-bold text-sm shadow-md transition-all flex items-center justify-center gap-3 ${agreedToTerms
+                  ? 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer'
+                  : 'bg-slate-100 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-60'
+                }`}
             >
               {googleLoading ? (
                 <div className="w-5 h-5 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
