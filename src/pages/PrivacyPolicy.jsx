@@ -80,7 +80,7 @@ const PrivacyPolicy = () => {
             content: [
                 {
                     subtitle: "No Sale of Personal Data",
-                    text: "We never sell your personal information or chat data to third parties. Your privacy is our top priority."
+                    text: "We do not sell personal data to third parties. We never sell your personal information or chat data. Your privacy is our top priority and this commitment applies globally."
                 },
                 {
                     subtitle: "AI Model Providers",
@@ -110,7 +110,7 @@ const PrivacyPolicy = () => {
                 },
                 {
                     subtitle: "Deletion Rights",
-                    text: "You have the right to delete individual chat sessions or request complete account deletion. This action is irreversible and removes all associated data."
+                    text: "You have the right to delete individual chat sessions or request complete deletion of your personal data. Users may request deletion of their personal data by contacting support at admin@uwo24.com. Requests will be processed in accordance with applicable privacy regulations including GDPR, CCPA, and other data protection laws."
                 },
                 {
                     subtitle: "Opt-Out Options",
@@ -176,7 +176,7 @@ const PrivacyPolicy = () => {
                         Your privacy matters to us. Learn how we collect, use, and protect your data.
                     </p>
                     <p className="text-sm text-subtext mt-4">
-                        <strong>Last Updated:</strong> January 22, 2026
+                        <strong>Last Updated:</strong> March 7, 2026
                     </p>
                 </motion.div>
 
@@ -225,6 +225,34 @@ const PrivacyPolicy = () => {
                         </motion.div>
                     ))}
                 </div>
+
+                {/* Global Regulatory Compliance */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.75 }}
+                    className="mt-8 bg-white dark:bg-slate-900 rounded-2xl p-8 border border-border shadow-sm"
+                >
+                    <h2 className="text-2xl font-bold text-maintext mb-4">Global Regulatory Compliance</h2>
+                    <p className="text-subtext leading-relaxed mb-4">
+                        AISA™ operates in compliance with major global data protection and privacy regulations. We are committed to upholding user rights across all jurisdictions.
+                    </p>
+                    <div className="space-y-3">
+                        {[
+                            { name: "General Data Protection Regulation (GDPR) — EU", url: "https://gdpr.eu/" },
+                            { name: "California Consumer Privacy Act (CCPA) — USA", url: "https://oag.ca.gov/privacy/ccpa" },
+                            { name: "PIPEDA — Canada", url: "https://www.priv.gc.ca/en/privacy-topics/privacy-laws-in-canada/the-personal-information-protection-and-electronic-documents-act-pipeda/" },
+                            { name: "Personal Data Protection Act (PDPA) — Singapore", url: "https://www.pdpc.gov.sg/overview-of-pdpa/the-legislation/personal-data-protection-act" },
+                            { name: "Privacy Act 1988 — Australia", url: "https://www.oaic.gov.au/privacy/the-privacy-act" }
+                        ].map((reg, i) => (
+                            <a key={i} href={reg.url} target="_blank" rel="noopener noreferrer"
+                                className="flex items-center gap-3 p-3 bg-primary/5 hover:bg-primary/10 border border-primary/10 rounded-xl transition-colors group">
+                                <Shield className="w-5 h-5 text-primary shrink-0" />
+                                <span className="text-sm text-maintext group-hover:text-primary transition-colors">{reg.name}</span>
+                            </a>
+                        ))}
+                    </div>
+                </motion.div>
 
                 {/* Contact Section */}
                 <motion.div

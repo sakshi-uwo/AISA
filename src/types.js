@@ -57,7 +57,8 @@ export const AppRoute = {
 };
 
 // API Base URL
-const API = window._env_?.AISA_BACKEND_API || import.meta.env.VITE_AISA_BACKEND_API;
+//const API = window._env_?.AISA_BACKEND_API || import.meta.env.VITE_AISA_BACKEND_API;
+const API = import.meta.env.VITE_AISA_BACKEND_API || "http://localhost:8080";
 
 const apis = {
   resetPassword: `${API}/auth/reset-password-otp`,

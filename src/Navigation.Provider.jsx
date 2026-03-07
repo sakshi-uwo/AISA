@@ -29,6 +29,7 @@ import { lazy, Suspense } from 'react';
 import ProtectedRoute from './Components/ProtectedRoute/ProtectedRoute.jsx';
 import { SubscriptionProvider, useSubscription } from './context/SubscriptionContext';
 import UpgradeModal from './Components/Subscription/UpgradeModal.jsx';
+import CookieConsentBanner from './Components/CookieConsentBanner.jsx';
 
 // Vendor Imports Removed
 // import VendorLayout from './Components/Vendor/VendorLayout';
@@ -90,52 +91,52 @@ const AuthenticatRoute = ({ children }) => {
 // ------------------------------
 
 const PlanExpiryBanner = () => {
-    const { plan, planEndDate, setIsUpgradeModalOpen } = useSubscription();
+  const { plan, planEndDate, setIsUpgradeModalOpen } = useSubscription();
 
-    if (!planEndDate || !plan || plan.toLowerCase() === 'basic' || plan.toLowerCase() === 'free') return null;
+  if (!planEndDate || !plan || plan.toLowerCase() === 'basic' || plan.toLowerCase() === 'free') return null;
 
-    const endDate = new Date(planEndDate);
-    const now = new Date();
-    const diffTime = endDate.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const endDate = new Date(planEndDate);
+  const now = new Date();
+  const diffTime = endDate.getTime() - now.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays <= 3 && diffDays > 0) {
-        return (
-            <div className="bg-gradient-to-r from-red-500/90 to-orange-500/90 backdrop-blur-md text-white px-4 py-2.5 flex items-center justify-center sm:justify-between flex-wrap gap-2 text-sm shadow-md z-50 shrink-0 border-b border-red-400/30">
-                <div className="flex items-center gap-2">
-                    <span className="animate-pulse">🔥</span>
-                    <span className="font-medium text-center">
-                        Your <strong>{plan.toUpperCase()}</strong> plan expires in <strong>{diffDays} day{diffDays !== 1 ? 's' : ''}</strong>!
-                    </span>
-                </div>
-                <button 
-                  onClick={() => setIsUpgradeModalOpen(true)}
-                  className="bg-white text-red-600 px-4 py-1.5 rounded-full text-xs font-bold hover:bg-red-50 transition-transform active:scale-95 shadow-sm"
-                >
-                    Renew Now
-                </button>
-            </div>
-        );
-    } else if (diffDays <= 0) {
-        return (
-            <div className="bg-red-600/90 backdrop-blur-md text-white px-4 py-2.5 flex items-center justify-center sm:justify-between flex-wrap gap-2 text-sm shadow-md z-50 shrink-0 border-b border-red-500/30">
-                <div className="flex items-center gap-2">
-                    <span>⚠️</span>
-                    <span className="font-medium text-center">
-                        Your <strong>{plan.toUpperCase()}</strong> plan has expired.
-                    </span>
-                </div>
-                <button 
-                  onClick={() => setIsUpgradeModalOpen(true)}
-                  className="bg-white text-red-600 px-4 py-1.5 rounded-full text-xs font-bold hover:bg-red-50 transition-transform active:scale-95 shadow-sm"
-                >
-                    Upgrade Plan
-                </button>
-            </div>
-        );
-    }
+  if (diffDays <= 3 && diffDays > 0) {
+    return (
+      <div className="bg-gradient-to-r from-red-500/90 to-orange-500/90 backdrop-blur-md text-white px-4 py-2.5 flex items-center justify-center sm:justify-between flex-wrap gap-2 text-sm shadow-md z-50 shrink-0 border-b border-red-400/30">
+        <div className="flex items-center gap-2">
+          <span className="animate-pulse">🔥</span>
+          <span className="font-medium text-center">
+            Your <strong>{plan.toUpperCase()}</strong> plan expires in <strong>{diffDays} day{diffDays !== 1 ? 's' : ''}</strong>!
+          </span>
+        </div>
+        <button
+          onClick={() => setIsUpgradeModalOpen(true)}
+          className="bg-white text-red-600 px-4 py-1.5 rounded-full text-xs font-bold hover:bg-red-50 transition-transform active:scale-95 shadow-sm"
+        >
+          Renew Now
+        </button>
+      </div>
+    );
+  } else if (diffDays <= 0) {
+    return (
+      <div className="bg-red-600/90 backdrop-blur-md text-white px-4 py-2.5 flex items-center justify-center sm:justify-between flex-wrap gap-2 text-sm shadow-md z-50 shrink-0 border-b border-red-500/30">
+        <div className="flex items-center gap-2">
+          <span>⚠️</span>
+          <span className="font-medium text-center">
+            Your <strong>{plan.toUpperCase()}</strong> plan has expired.
+          </span>
+        </div>
+        <button
+          onClick={() => setIsUpgradeModalOpen(true)}
+          className="bg-white text-red-600 px-4 py-1.5 rounded-full text-xs font-bold hover:bg-red-50 transition-transform active:scale-95 shadow-sm"
+        >
+          Upgrade Plan
+        </button>
+      </div>
+    );
+  }
 
-    return null;
+  return null;
 };
 
 const DashboardLayout = () => {
@@ -187,7 +188,7 @@ const DashboardLayout = () => {
 
       <div className="flex-1 flex flex-col min-w-0 bg-transparent h-full relative">
         <PlanExpiryBanner />
-        
+
         {/* Mobile Header - Hide on Chat/Assistant if they provide their own toggle */}
         {!isFullScreen && !location.pathname.includes('/chat') && !location.pathname.includes('/ai-personal-assistant') && (
           <div className="lg:hidden flex items-center justify-between p-4 border-b border-border bg-secondary shrink-0 z-50 shadow-sm">
@@ -247,6 +248,7 @@ const NavigateProvider = () => {
     <SubscriptionProvider>
       <Toaster position="top-right" />
       <UpgradeModal />
+      <CookieConsentBanner />
       <AnimatePresence>
         {tglState.platformSubTgl && <PlatformSubscriptionModal />}
       </AnimatePresence>
