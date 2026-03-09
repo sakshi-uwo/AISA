@@ -1,142 +1,54 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Cookie, Settings2, BarChart3, Shield, Smartphone, ArrowLeft } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { name } from '../constants';
+import { COOKIE_POLICY_DEFAULTS } from '../constants/legalDefaults';
 
 const CookiePolicy = () => {
     const navigate = useNavigate();
+    const [sections, setSections] = useState([]);
+    const [lastUpdated, setLastUpdated] = useState("March 7, 2026");
+    const [loading, setLoading] = useState(true);
 
-    const sections = [
-        {
-            icon: Cookie,
-            title: "What Are Cookies?",
-            content: [
-                {
-                    subtitle: "Definition",
-                    text: "Cookies are small text files that are placed on your device when you visit our website. They help us recognize you, remember your preferences, and provide a personalized experience on AISA™."
-                },
-                {
-                    subtitle: "How We Use Them",
-                    text: "We use cookies and similar technologies to maintain your login session, remember your language and theme preferences, and analyze how you interact with our platform to improve our services."
-                },
-                {
-                    subtitle: "Cookie Duration",
-                    text: "Some cookies are temporary (session cookies) and expire when you close your browser. Others are persistent and remain on your device for a set period or until you delete them."
+    const getDynamicIcon = (index) => {
+        const icons = [Cookie, Settings2, Smartphone, BarChart3, Shield, FileText];
+        return icons[index % icons.length] || FileText;
+    };
+
+    useEffect(() => {
+        const fetchContent = async () => {
+            try {
+                const data = await apiService.getLegalPage('cookie-policy');
+                if (data && data.sections && data.sections.length > 0) {
+                    const mappedSections = data.sections.map((s, i) => ({
+                        ...s,
+                        icon: getDynamicIcon(i)
+                    }));
+                    setSections(mappedSections);
+                    if (data.lastUpdated) {
+                        setLastUpdated(new Date(data.lastUpdated).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        }));
+                    }
+                } else {
+                    const mappedDefaults = COOKIE_POLICY_DEFAULTS.map((s, i) => ({
+                        ...s,
+                        icon: getDynamicIcon(i)
+                    }));
+                    setSections(mappedDefaults);
                 }
-            ]
-        },
-        {
-            icon: Settings2,
-            title: "Types of Cookies We Use",
-            content: [
-                {
-                    subtitle: "Essential Cookies (Required)",
-                    text: "These cookies are necessary for AISA™ to function properly. They enable core features like user authentication, session management, and security. You cannot opt out of essential cookies."
-                },
-                {
-                    subtitle: "Preference Cookies",
-                    text: "These cookies remember your choices such as language preference (EN, ES, FR, etc.), region settings, theme (light/dark mode), and notification preferences to provide a customized experience."
-                },
-                {
-                    subtitle: "Analytics Cookies (Optional)",
-                    text: "With your consent, we use analytics cookies to understand user behavior, measure platform performance, and identify areas for improvement. These help us enhance your experience."
-                },
-                {
-                    subtitle: "Functional Cookies",
-                    text: "These cookies enable enhanced functionality like chat history synchronization, multimodal feature preferences, and AI agent selection to provide seamless interactions."
-                }
-            ]
-        },
-        {
-            icon: Smartphone,
-            title: "Local Storage & Session Storage",
-            content: [
-                {
-                    subtitle: "Chat Session Storage",
-                    text: "Your chat conversations with AISA™ are stored in your browser's local storage for quick access and offline capability. This allows you to resume conversations and view chat history without delays."
-                },
-                {
-                    subtitle: "User Preferences",
-                    text: "Settings like your selected AI agent, personalization options, and interface customizations are stored locally to provide instant access across sessions."
-                },
-                {
-                    subtitle: "Session Management",
-                    text: "We use session storage to maintain your active chat session, authentication state, and temporary data that expires when you close your browser."
-                },
-                {
-                    subtitle: "Data Control",
-                    text: "You have full control over locally stored data. You can delete individual chat sessions or clear all local data from your browser settings or profile dashboard."
-                }
-            ]
-        },
-        {
-            icon: BarChart3,
-            title: "Third-Party Cookies & Analytics",
-            content: [
-                {
-                    subtitle: "Analytics Services",
-                    text: "We may use third-party analytics services to better understand user engagement and platform performance. These services use cookies to collect anonymized usage data."
-                },
-                {
-                    subtitle: "AI Model Providers",
-                    text: "Our AI models are powered by advanced providers. While we process your queries securely, these providers may use cookies for service optimization and security purposes."
-                },
-                {
-                    subtitle: "Payment Processors",
-                    text: "When you subscribe to AISA™, our payment partners may use cookies to process transactions securely and prevent fraud."
-                },
-                {
-                    subtitle: "Third-Party Control",
-                    text: "We do not control third-party cookies. Please review the privacy policies of our partners to understand their cookie practices."
-                }
-            ]
-        },
-        {
-            icon: Shield,
-            title: "Your Cookie Choices",
-            content: [
-                {
-                    subtitle: "Browser Controls",
-                    text: "Most browsers allow you to control cookies through settings. You can block, delete, or receive warnings about cookies. Note that blocking essential cookies may prevent AISA™ from functioning properly."
-                },
-                {
-                    subtitle: "Opt-Out Options",
-                    text: "You can opt out of analytics cookies through your profile settings under 'Privacy & Data'. This will disable non-essential tracking while maintaining platform functionality."
-                },
-                {
-                    subtitle: "Do Not Track",
-                    text: "We respect Do Not Track (DNT) signals. If your browser has DNT enabled, we will not use analytics cookies or track your behavior beyond what's necessary for service delivery."
-                },
-                {
-                    subtitle: "Mobile Devices",
-                    text: "On mobile devices, you can control cookies and tracking through your device settings and browser preferences. Refer to your device manufacturer's instructions for details."
-                }
-            ]
-        },
-        {
-            icon: Cookie,
-            title: "Cookie Management Guide",
-            content: [
-                {
-                    subtitle: "How to Disable Cookies",
-                    text: "To disable cookies in Chrome: Settings > Privacy and Security > Cookies and other site data. For Firefox: Settings > Privacy & Security > Cookies and Site Data. For Safari: Preferences > Privacy > Cookies and website data."
-                },
-                {
-                    subtitle: "Clear Existing Cookies",
-                    text: "You can clear cookies at any time through your browser settings. In most browsers, go to Settings > Privacy > Clear browsing data and select 'Cookies and other site data'."
-                },
-                {
-                    subtitle: "Platform Cookie Settings",
-                    text: "Access your AISA™ cookie preferences from Profile > Settings > Privacy & Data > Cookie Preferences. Here you can enable/disable optional cookies and view which cookies are active."
-                },
-                {
-                    subtitle: "Impact of Disabling Cookies",
-                    text: "Disabling cookies may limit your experience on AISA™. You may not be able to stay logged in, your preferences won't be saved, and some features may not work as intended."
-                }
-            ]
-        }
-    ];
+            } catch (err) {
+                console.error("Failed to fetch dynamic policy:", err);
+                const mappedDefaults = COOKIE_POLICY_DEFAULTS.map((s, i) => ({
+                    ...s,
+                    icon: getDynamicIcon(i)
+                }));
+                setSections(mappedDefaults);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchContent();
+    }, []);
+
 
 
 
@@ -174,7 +86,7 @@ const CookiePolicy = () => {
                         Learn how we use cookies and similar technologies to enhance your experience.
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
-                        <strong className="text-gray-700 dark:text-gray-200">Last Updated:</strong> March 7, 2026
+                        <strong className="text-gray-700 dark:text-gray-200">Last Updated:</strong> {lastUpdated}
                     </p>
                 </motion.div>
 

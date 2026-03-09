@@ -23,10 +23,21 @@ const CookieConsentBanner = () => {
 
         const consent = localStorage.getItem(COOKIE_CONSENT_KEY);
         if (!consent) {
-            const timer = setTimeout(() => setIsVisible(true), 1000);
-            return () => clearTimeout(timer);
+            // Show instantly to block landing page
+            setIsVisible(true);
         }
     }, []);
+
+    useEffect(() => {
+        if (isVisible) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isVisible]);
 
     const saveConsent = (data) => {
         localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify({
@@ -124,7 +135,7 @@ const CookieConsentBanner = () => {
                                         AISA™ uses cookies to improve your experience, store preferences, and analyze usage.
                                         Please choose an option below to continue to the platform.{' '}
                                         <button
-                                            onClick={() => navigate('/cookie-policy')}
+                                            onClick={() => window.open('/cookie-policy', '_blank')}
                                             className="text-purple-600 dark:text-purple-400 hover:underline font-bold"
                                         >
                                             Cookie Policy →
@@ -172,17 +183,17 @@ const CookieConsentBanner = () => {
                                                     <div
                                                         key={option.key}
                                                         className={`flex items-center gap-4 p-3.5 rounded-xl border transition-all ${option.locked
-                                                                ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800'
-                                                                : option.enabled
-                                                                    ? 'bg-purple-50 dark:bg-purple-900/10 border-purple-200 dark:border-purple-800'
-                                                                    : 'bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700'
+                                                            ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800'
+                                                            : option.enabled
+                                                                ? 'bg-purple-50 dark:bg-purple-900/10 border-purple-200 dark:border-purple-800'
+                                                                : 'bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700'
                                                             }`}
                                                     >
                                                         <Icon className={`w-5 h-5 shrink-0 ${option.locked
-                                                                ? 'text-green-600 dark:text-green-400'
-                                                                : option.enabled
-                                                                    ? 'text-purple-600 dark:text-purple-400'
-                                                                    : 'text-gray-400'
+                                                            ? 'text-green-600 dark:text-green-400'
+                                                            : option.enabled
+                                                                ? 'text-purple-600 dark:text-purple-400'
+                                                                : 'text-gray-400'
                                                             }`} />
                                                         <div className="flex-1 min-w-0">
                                                             <p className="text-sm font-bold text-gray-900 dark:text-white">{option.label}</p>
@@ -196,8 +207,8 @@ const CookieConsentBanner = () => {
                                                             <button
                                                                 onClick={() => togglePref(option.key)}
                                                                 className={`relative w-12 h-6 rounded-full transition-all duration-300 shrink-0 ${option.enabled
-                                                                        ? 'bg-gradient-to-r from-purple-500 to-blue-500'
-                                                                        : 'bg-gray-300 dark:bg-slate-600'
+                                                                    ? 'bg-gradient-to-r from-purple-500 to-blue-500'
+                                                                    : 'bg-gray-300 dark:bg-slate-600'
                                                                     }`}
                                                             >
                                                                 <span

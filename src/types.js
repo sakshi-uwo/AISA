@@ -54,6 +54,7 @@ export const AppRoute = {
   PRIVACY_POLICY: "/privacy-policy",
   TERMS_OF_SERVICE: "/terms-of-service",
   COOKIE_POLICY: "/cookie-policy",
+  ADMIN_DASHBOARD: "/dashboard/admin",
 };
 
 // API Base URL

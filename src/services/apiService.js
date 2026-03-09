@@ -35,13 +35,13 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
-    
+
     if (error.response?.status === 403 && error.response?.data?.code === 'OUT_OF_CREDITS') {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        user.credits = error.response.data.available || 0; 
-        localStorage.setItem('user', JSON.stringify(user));
-        
-        window.dispatchEvent(new CustomEvent('out_of_credits'));
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      user.credits = error.response.data.available || 0;
+      localStorage.setItem('user', JSON.stringify(user));
+
+      window.dispatchEvent(new CustomEvent('out_of_credits'));
     }
     return Promise.reject(error);
   }
@@ -49,11 +49,11 @@ apiClient.interceptors.response.use(
 
 export const apiService = {
   // --- AI Tools ---
-  async generateImage(prompt, aspectRatio = '1:1') {
+  async generateImage(prompt, aspectRatio = '1:1', modelId = 'imagen-3.0-generate-001') {
     try {
-      console.log("[Frontend] Generating image for prompt:", prompt, "Ratio:", aspectRatio);
+      console.log("[Frontend] Generating image for prompt:", prompt, "Ratio:", aspectRatio, "Model:", modelId);
       // Increased timeout to 60s for image generation
-      const response = await apiClient.post('/image/generate', { prompt, aspectRatio }, { timeout: 60000 });
+      const response = await apiClient.post('/image/generate', { prompt, aspectRatio, modelId }, { timeout: 60000 });
       console.log("[Frontend] Image generation success:", response.data);
       return response.data;
     } catch (error) {
@@ -78,11 +78,11 @@ export const apiService = {
     }
   },
 
-  async generateVideo(prompt, duration = 5, quality = 'medium', aspectRatio = '16:9') {
+  async generateVideo(prompt, duration = 5, quality = 'medium', aspectRatio = '16:9', modelId = 'veo-3.1-fast-generate-001', resolution = '1080p') {
     try {
-      console.log(`[Frontend] Generating video for prompt: ${prompt}, Ratio: ${aspectRatio}`);
+      console.log(`[Frontend] Generating video for prompt: ${prompt}, Ratio: ${aspectRatio}, Model: ${modelId}, Res: ${resolution}`);
       // Increased timeout to 120s for video generation as it takes longer
-      const response = await apiClient.post('/video/generate', { prompt, duration, quality, aspectRatio }, { timeout: 120000 });
+      const response = await apiClient.post('/video/generate', { prompt, duration, quality, aspectRatio, modelId, resolution }, { timeout: 120000 });
       console.log("[Frontend] Video generation success:", response.data);
       return response.data;
     } catch (error) {
@@ -496,6 +496,27 @@ export const apiService = {
     } catch (error) {
       console.error("Failed to fetch reports:", error);
       return [];
+    }
+  },
+
+  // --- Legal ---
+  async getLegalPage(pageType) {
+    try {
+      const response = await apiClient.get(`/legal/${pageType}`);
+      return response.data.data;
+    } catch (error) {
+      console.error(`Failed to fetch ${pageType}:`, error);
+      return null;
+    }
+  },
+
+  async updateLegalPage(pageType, sections) {
+    try {
+      const response = await apiClient.put(`/legal/${pageType}`, { sections });
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to update ${pageType}:`, error);
+      throw error;
     }
   },
 
