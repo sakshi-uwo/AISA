@@ -34,6 +34,7 @@ import ProtectedRoute from './Components/ProtectedRoute/ProtectedRoute.jsx';
 // ...
 
 const SecurityAndGuidelines = lazy(() => import('./pages/SecurityAndGuidelines'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 
 // ------------------------------
 // Home Redirect Component
@@ -187,6 +188,7 @@ const PlaceholderPage = ({ title }) => (
 // ------------------------------
 
 import { Toaster } from 'react-hot-toast';
+import CookieConsentBanner from './Components/CookieConsentBanner';
 
 const NavigateProvider = () => {
   const [tglState] = useRecoilState(toggleState);
@@ -195,6 +197,7 @@ const NavigateProvider = () => {
     <>
       <Toaster position="top-right" />
       <CreditUpsellPopup />
+      <CookieConsentBanner />
       <Routes>
         {/* Public Routes */}
         <Route path={AppRoute.LANDING} element={<HomeRedirect />} />
@@ -204,6 +207,7 @@ const NavigateProvider = () => {
         <Route path={AppRoute.E_Verification} element={<VerificationForm />} />
         <Route path={AppRoute.FORGOT_PASSWORD} element={<ForgotPassword />} />
         <Route path={AppRoute.RESET_PASSWORD} element={<ResetPassword />} />
+
         <Route path={AppRoute.PRIVACY_POLICY} element={<PrivacyPolicy />} />
         <Route path={AppRoute.TERMS_OF_SERVICE} element={<TermsOfService />} />
         <Route path={AppRoute.COOKIE_POLICY} element={<CookiePolicy />} />
@@ -219,6 +223,11 @@ const NavigateProvider = () => {
           <Route path="ai-personal-assistant" element={<ProtectedRoute><AiPersonalAssistantDashboard /></ProtectedRoute>} />
 
           <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="admin" element={
+            <Suspense fallback={<div className="flex items-center justify-center h-full">Loading...</div>}>
+              <AdminDashboard />
+            </Suspense>
+          } />
           <Route path="security" element={
             <Suspense fallback={<div className="flex items-center justify-center h-full">Loading...</div>}>
               <SecurityAndGuidelines />

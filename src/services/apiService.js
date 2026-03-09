@@ -499,6 +499,27 @@ export const apiService = {
     }
   },
 
+  // --- Legal ---
+  async getLegalPage(pageType) {
+    try {
+      const response = await apiClient.get(`/legal/${pageType}`);
+      return response.data.data;
+    } catch (error) {
+      console.error(`Failed to fetch ${pageType}:`, error);
+      return null;
+    }
+  },
+
+  async updateLegalPage(pageType, sections) {
+    try {
+      const response = await apiClient.put(`/legal/${pageType}`, { sections });
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to update ${pageType}:`, error);
+      throw error;
+    }
+  },
+
   async resolveReport(id, status, resolutionNote) {
     try {
       const response = await apiClient.put(`/reports/${id}/resolve`, { status, resolutionNote });
