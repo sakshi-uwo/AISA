@@ -35,13 +35,13 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
-    
+
     if (error.response?.status === 403 && error.response?.data?.code === 'OUT_OF_CREDITS') {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        user.credits = error.response.data.available || 0; 
-        localStorage.setItem('user', JSON.stringify(user));
-        
-        window.dispatchEvent(new CustomEvent('out_of_credits'));
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      user.credits = error.response.data.available || 0;
+      localStorage.setItem('user', JSON.stringify(user));
+
+      window.dispatchEvent(new CustomEvent('out_of_credits'));
     }
     return Promise.reject(error);
   }
@@ -496,6 +496,27 @@ export const apiService = {
     } catch (error) {
       console.error("Failed to fetch reports:", error);
       return [];
+    }
+  },
+
+  // --- Legal ---
+  async getLegalPage(pageType) {
+    try {
+      const response = await apiClient.get(`/legal/${pageType}`);
+      return response.data.data;
+    } catch (error) {
+      console.error(`Failed to fetch ${pageType}:`, error);
+      return null;
+    }
+  },
+
+  async updateLegalPage(pageType, sections) {
+    try {
+      const response = await apiClient.put(`/legal/${pageType}`, { sections });
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to update ${pageType}:`, error);
+      throw error;
     }
   },
 

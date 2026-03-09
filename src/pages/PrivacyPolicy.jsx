@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Lock, Eye, Database, UserCheck, FileText, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { name } from '../constants';
+import { apiService } from '../services/apiService';
 
 const PrivacyPolicy = () => {
     const navigate = useNavigate();
+    const [sections, setSections] = useState([]);
+    const [lastUpdated, setLastUpdated] = useState("March 7, 2026");
+    const [loading, setLoading] = useState(true);
 
-    const sections = [
+    const defaultSections = [
         {
             icon: Database,
             title: "Information We Collect",
@@ -142,6 +146,41 @@ const PrivacyPolicy = () => {
         }
     ];
 
+    const getDynamicIcon = (index) => {
+        const icons = [Database, Lock, Shield, Eye, UserCheck, FileText];
+        return icons[index % icons.length] || FileText;
+    };
+
+    useEffect(() => {
+        const fetchContent = async () => {
+            try {
+                const data = await apiService.getLegalPage('privacy-policy');
+                if (data && data.sections && data.sections.length > 0) {
+                    const mappedSections = data.sections.map((s, i) => ({
+                        ...s,
+                        icon: getDynamicIcon(i)
+                    }));
+                    setSections(mappedSections);
+                    if (data.lastUpdated) {
+                        setLastUpdated(new Date(data.lastUpdated).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        }));
+                    }
+                } else {
+                    setSections(defaultSections);
+                }
+            } catch (err) {
+                console.error("Failed to fetch dynamic policy:", err);
+                setSections(defaultSections);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchContent();
+    }, []);
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-slate-950 dark:via-blue-950/10 dark:to-slate-950">
             {/* Header */}
@@ -176,7 +215,7 @@ const PrivacyPolicy = () => {
                         Your privacy matters to us. Learn how we collect, use, and protect your data.
                     </p>
                     <p className="text-sm text-subtext mt-4">
-                        <strong>Last Updated:</strong> March 7, 2026
+                        <strong>Last Updated:</strong> {lastUpdated}
                     </p>
                 </motion.div>
 

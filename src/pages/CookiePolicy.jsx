@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Cookie, Settings2, BarChart3, Shield, Smartphone, ArrowLeft } from 'lucide-react';
+import { Cookie, Settings2, BarChart3, Shield, Smartphone, ArrowLeft, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { name } from '../constants';
+import { apiService } from '../services/apiService';
 
 const CookiePolicy = () => {
     const navigate = useNavigate();
+    const [sections, setSections] = useState([]);
+    const [lastUpdated, setLastUpdated] = useState("March 7, 2026");
+    const [loading, setLoading] = useState(true);
 
-    const sections = [
+    const defaultSections = [
         {
             icon: Cookie,
             title: "What Are Cookies?",
@@ -138,6 +142,41 @@ const CookiePolicy = () => {
         }
     ];
 
+    const getDynamicIcon = (index) => {
+        const icons = [Cookie, Settings2, Smartphone, BarChart3, Shield, Cookie];
+        return icons[index % icons.length] || FileText;
+    };
+
+    useEffect(() => {
+        const fetchContent = async () => {
+            try {
+                const data = await apiService.getLegalPage('cookie-policy');
+                if (data && data.sections && data.sections.length > 0) {
+                    const mappedSections = data.sections.map((s, i) => ({
+                        ...s,
+                        icon: getDynamicIcon(i)
+                    }));
+                    setSections(mappedSections);
+                    if (data.lastUpdated) {
+                        setLastUpdated(new Date(data.lastUpdated).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        }));
+                    }
+                } else {
+                    setSections(defaultSections);
+                }
+            } catch (err) {
+                console.error("Failed to fetch dynamic policy:", err);
+                setSections(defaultSections);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchContent();
+    }, []);
+
 
 
     return (
@@ -174,7 +213,7 @@ const CookiePolicy = () => {
                         Learn how we use cookies and similar technologies to enhance your experience.
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
-                        <strong className="text-gray-700 dark:text-gray-200">Last Updated:</strong> March 7, 2026
+                        <strong className="text-gray-700 dark:text-gray-200">Last Updated:</strong> {lastUpdated}
                     </p>
                 </motion.div>
 

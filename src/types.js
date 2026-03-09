@@ -54,10 +54,12 @@ export const AppRoute = {
   PRIVACY_POLICY: "/privacy-policy",
   TERMS_OF_SERVICE: "/terms-of-service",
   COOKIE_POLICY: "/cookie-policy",
+  ADMIN_DASHBOARD: "/dashboard/admin",
 };
 
 // API Base URL
-const API = window._env_?.AISA_BACKEND_API || import.meta.env.VITE_AISA_BACKEND_API || "http://localhost:8080";
+// const API = window._env_?.AISA_BACKEND_API || import.meta.env.VITE_AISA_BACKEND_API || "http://localhost:8080/api";
+const API = "http://localhost:8080/api";
 console.log(API);
 
 const apis = {

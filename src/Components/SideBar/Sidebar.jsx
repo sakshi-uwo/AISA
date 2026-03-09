@@ -534,6 +534,15 @@ const Sidebar = ({ isOpen, onClose }) => {
             {/* Admin Help Desk Button - Only for admin@uwo24.com */}
             {isAdmin && (
               <button
+                onClick={() => { navigate('/dashboard/admin'); onClose(); }}
+                className="w-full flex items-center justify-center gap-2 px-2 py-1.5 rounded-lg text-white bg-gradient-to-r from-primary to-primary/70 hover:opacity-90 transition-all text-xs border border-primary/30 font-semibold backdrop-blur-sm shadow-lg shadow-primary/20"
+              >
+                <Shield className="w-3.5 h-3.5" />
+                <span>Admin Dashboard</span>
+              </button>
+            )}
+            {isAdmin && (
+              <button
                 onClick={() => setIsAdminHelpDeskOpen(true)}
                 className="w-full flex items-center justify-center gap-2 px-2 py-1.5 rounded-lg text-amber-600 bg-amber-500/10 hover:bg-amber-500/20 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 transition-all text-xs border border-amber-500/20 hover:border-amber-500/30 font-semibold backdrop-blur-sm"
               >
