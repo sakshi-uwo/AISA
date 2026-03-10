@@ -19,8 +19,6 @@ import toast from 'react-hot-toast';
 import axios from 'axios';
 import { apis } from '../../types';
 import CustomSelect from '../CustomSelect/CustomSelect';
-import KnowledgeUpload from '../KnowledgeUpload';
-
 const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
     const [currentUserData, setUserRecoil] = useRecoilState(userData);
     const user = currentUserData.user || getUserData();
@@ -334,19 +332,6 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
         });
 
         // 2. Data Settings
-        settings.push({
-            id: 'ragKnowledgeBase',
-            tab: 'data',
-            label: 'Vertex RAG Knowledge Base',
-            description: 'Upload documents to your AI knowledge base',
-            keywords: 'upload document rag vertex ai knowledge pdf base file',
-            component: (
-                <div className="pt-4 pb-6 animate-in fade-in duration-300">
-                    <KnowledgeUpload />
-                </div>
-            )
-        });
-
         settings.push({
             id: 'chatHistory',
             tab: 'data',
