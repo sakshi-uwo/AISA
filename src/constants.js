@@ -12,7 +12,7 @@ export const faqs = [
     },
     {
         question: "What AI models power AISA™?",
-        answer: "We use advanced AI models including Gemini to ensure high-quality responses, fast processing, and excellent reasoning capabilities."
+        answer: "We use advanced proprietary AI models to ensure high-quality responses, fast processing, and excellent reasoning capabilities."
     },
     {
         question: "Is my data secure?",

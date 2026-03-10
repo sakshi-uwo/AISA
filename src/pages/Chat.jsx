@@ -61,26 +61,26 @@ const FEEDBACK_PROMPTS = {
 const TOOL_PRICING = {
   chat: {
     models: [
-      { id: 'gemini-flash', name: 'Gemini Flash', price: 0, speed: 'Fast', description: 'Free chat model' }
+      { id: 'gemini-flash', name: 'AISA Flash', price: 0, speed: 'Fast', description: 'Free chat model' }
     ]
   },
   image: {
     models: [
-      { id: 'gemini-flash', name: 'Gemini Flash', price: 0, speed: 'Fast', description: 'Basic image analysis' },
-      { id: 'gemini-pro', name: 'Gemini Pro Vision', price: 0.02, speed: 'Medium', description: 'Advanced image understanding' },
-      { id: 'gpt4-vision', name: 'GPT-4 Vision', price: 0.05, speed: 'Slow', description: 'Premium image analysis' }
+      { id: 'gemini-flash', name: 'AISA Flash', price: 0, speed: 'Fast', description: 'Basic image analysis' },
+      { id: 'gemini-pro', name: 'AISA Pro Vision', price: 0.02, speed: 'Medium', description: 'Advanced image understanding' },
+      { id: 'gpt4-vision', name: 'AISA Vision Premium', price: 0.05, speed: 'Slow', description: 'Premium image analysis' }
     ]
   },
   document: {
     models: [
-      { id: 'gemini-flash', name: 'Gemini Flash', price: 0, speed: 'Fast', description: 'Basic document analysis' },
-      { id: 'gemini-pro', name: 'Gemini Pro', price: 0.02, speed: 'Medium', description: 'Advanced document processing' },
-      { id: 'gpt4', name: 'GPT-4', price: 0.03, speed: 'Medium', description: 'Premium document analysis' }
+      { id: 'gemini-flash', name: 'AISA Flash', price: 0, speed: 'Fast', description: 'Basic document analysis' },
+      { id: 'gemini-pro', name: 'AISA Pro', price: 0.02, speed: 'Medium', description: 'Advanced document processing' },
+      { id: 'gpt4', name: 'AISA Premium', price: 0.03, speed: 'Medium', description: 'Premium document analysis' }
     ]
   },
   voice: {
     models: [
-      { id: 'gemini-flash', name: 'Gemini Flash', price: 0, speed: 'Fast', description: 'Standard voice recognition' }
+      { id: 'gemini-flash', name: 'AISA Flash', price: 0, speed: 'Fast', description: 'Standard voice recognition' }
     ]
   }
 };
@@ -5129,8 +5129,8 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                               value={imageModelId}
                               onChange={(e) => setImageModelId(e.target.value)}
                             >
-                              <option className="bg-white dark:bg-zinc-900 text-slate-800 dark:text-white font-medium" value="imagen-3.0-generate-001">Imagen 3.0 (38 Credits)</option>
-                              <option className="bg-white dark:bg-zinc-900 text-slate-800 dark:text-white font-medium" value="imagen-4.0-ultra-generate-001">Imagen 4 Ultra (58 Credits)</option>
+                              <option className="bg-white dark:bg-zinc-900 text-slate-800 dark:text-white font-medium" value="imagen-3.0-generate-001">Imagen 3.0 (60 Credits)</option>
+                              <option className="bg-white dark:bg-zinc-900 text-slate-800 dark:text-white font-medium" value="imagen-4.0-ultra-generate-001">Imagen 4 Ultra (80 Credits)</option>
                             </select>
                             <ChevronDown size={12} className="absolute right-0 pointer-events-none" />
                           </div>
@@ -5159,8 +5159,8 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                               value={videoResolution}
                               onChange={(e) => setVideoResolution(e.target.value)}
                             >
-                              <option className="bg-white dark:bg-zinc-900 text-slate-800 dark:text-white font-medium" value="1080p">1080p {videoModelId === 'veo-3.1-generate-001' ? '(500 Credits/s)' : '(188 Credits/s)'}</option>
-                              <option className="bg-white dark:bg-zinc-900 text-slate-800 dark:text-white font-medium" value="4k">4K {videoModelId === 'veo-3.1-generate-001' ? '(750 Credits/s)' : '(438 Credits/s)'}</option>
+                              <option className="bg-white dark:bg-zinc-900 text-slate-800 dark:text-white font-medium" value="1080p">1080p {videoModelId === 'veo-3.1-generate-001' ? '(800 Credits/s)' : '(300 Credits/s)'}</option>
+                              <option className="bg-white dark:bg-zinc-900 text-slate-800 dark:text-white font-medium" value="4k">4K {videoModelId === 'veo-3.1-generate-001' ? '(1200 Credits/s)' : '(700 Credits/s)'}</option>
                             </select>
                             <ChevronDown size={12} className="absolute right-0 pointer-events-none" />
                           </div>
@@ -5170,13 +5170,13 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                               value={videoModelId}
                               onChange={(e) => setVideoModelId(e.target.value)}
                             >
-                              <option className="bg-white dark:bg-zinc-900 text-slate-800 dark:text-white font-medium" value="veo-3.1-fast-generate-001">Veo 3.1 Fast</option>
-                              <option className="bg-white dark:bg-zinc-900 text-slate-800 dark:text-white font-medium" value="veo-3.1-generate-001">Veo 3.1 Full</option>
+                              <option className="bg-white dark:bg-zinc-900 text-slate-800 dark:text-white font-medium" value="veo-3.1-fast-generate-001">AISA Video Fast</option>
+                              <option className="bg-white dark:bg-zinc-900 text-slate-800 dark:text-white font-medium" value="veo-3.1-generate-001">AISA Video Pro</option>
                             </select>
                             <ChevronDown size={12} className="absolute right-0 pointer-events-none" />
                           </div>
                           <div className="ml-1 border-l border-red-500/20 pl-2 text-[10px] text-red-600/80 bg-red-500/5 px-2 py-0.5 rounded-full whitespace-nowrap hidden sm:block">
-                            Charges: {videoModelId === 'veo-3.1-generate-001' ? (videoResolution === '4k' ? '750' : '500') : (videoResolution === '4k' ? '438' : '188')} Credits/s
+                            Charges: {videoModelId === 'veo-3.1-generate-001' ? (videoResolution === '4k' ? '1200' : '800') : (videoResolution === '4k' ? '700' : '300')} Credits/s
                           </div>
                           <button onClick={() => setIsVideoGeneration(false)} className="ml-1 hover:text-red-800"><X size={12} /></button>
                         </motion.div>

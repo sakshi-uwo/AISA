@@ -58,3 +58,10 @@ export const createSubscriptionOrder = async (orderData) => {
   );
   return response.data;
 };
+
+export const getCreditHistory = async () => {
+  const response = await axios.get(apis.subscription.history, {
+    headers: getAuthHeaders(),
+  });
+  return response.data;
+};

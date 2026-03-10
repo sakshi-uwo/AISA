@@ -255,7 +255,7 @@ export const LanguageProvider = ({ children }) => {
                 },
                 {
                     question: "What AI models power AISA?",
-                    answer: "We use advanced AI models including Gemini to ensure high-quality responses, fast processing, and excellent reasoning capabilities."
+                    answer: "We use advanced proprietary AI models to ensure high-quality responses, fast processing, and excellent reasoning capabilities."
                 },
                 {
                     question: "Is my data secure?",
@@ -624,7 +624,7 @@ export const LanguageProvider = ({ children }) => {
                 },
                 {
                     question: "AISA को कौन से एआई मॉडल पावर देते हैं?",
-                    answer: "हम उच्च-गुणवत्ता वाली प्रतिक्रियाएं, तेज़ प्रसंस्करण और उत्कृष्ट तर्क क्षमता सुनिश्चित करने के लिए जेमिनी सहित उन्नत एआई मॉडल का उपयोग करते हैं।"
+                    answer: "हम उच्च-गुणवत्ता वाली प्रतिक्रियाएं, तेज़ प्रसंस्करण और उत्कृष्ट तर्क क्षमता सुनिश्चित करने के लिए उन्नत एआई मॉडल का उपयोग करते हैं।"
                 },
                 {
                     question: "क्या मेरा डेटा सुरक्षित है?",

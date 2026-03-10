@@ -90,14 +90,14 @@ export function detectMode(message = '', attachments = []) {
 
 export function getModeName(mode) {
     const names = {
-        [MODES.NORMAL_CHAT]: 'Chat',
-        [MODES.FILE_ANALYSIS]: 'File Analysis',
-        [MODES.CONTENT_WRITING]: 'Content Writing',
-        [MODES.CODING_HELP]: 'Coding Help',
-        [MODES.TASK_ASSISTANT]: 'Task Assistant',
-        [MODES.DEEP_SEARCH]: 'Deep Search',
-        [MODES.DOCUMENT_CONVERT]: 'Document Convert',
-        [MODES.IMAGE_EDIT]: 'Image Edit'
+        [MODES.NORMAL_CHAT]: 'AISA Chat',
+        [MODES.FILE_ANALYSIS]: 'AISA Analysis',
+        [MODES.CONTENT_WRITING]: 'AISA Writer',
+        [MODES.CODING_HELP]: 'AISA Coder',
+        [MODES.TASK_ASSISTANT]: 'AISA Assistant',
+        [MODES.DEEP_SEARCH]: 'AISA Deep Search',
+        [MODES.DOCUMENT_CONVERT]: 'AISA Convert',
+        [MODES.IMAGE_EDIT]: 'AISA Edit'
     };
     return names[mode] || 'Chat';
 }

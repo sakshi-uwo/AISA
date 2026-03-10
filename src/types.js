@@ -91,7 +91,7 @@ const apis = {
   subscription: {
     status: `${API}/subscription/status`,
     credits: `${API}/subscription/user-credits`,
-    history: `${API}/subscription/credit-usage-history`,
+    history: `${API}/subscription/credit-history`,
     purchase: `${API}/subscription/purchase-plan`,
     verify: `${API}/subscription/verify-payment`,
   }

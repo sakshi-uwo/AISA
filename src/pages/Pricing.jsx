@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getPlans, getCreditPackages, purchasePlan, buyCredits, createSubscriptionOrder } from '../services/pricingService';
 import './Pricing.css';
-import { Check, X, ShieldAlert, Sparkles, Zap, Image as ImageIcon, Video, Search, Users, ChevronRight } from 'lucide-react';
+import { Check, X, ShieldAlert, Sparkles, Zap, Image as ImageIcon, Video, Search, Users, ChevronRight, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useRecoilState } from 'recoil';
 import { userData, updateUser } from '../userStore/userData';
 
 const Pricing = () => {
+  const navigate = useNavigate();
   const [plans, setPlans] = useState([]);
   const [packages, setPackages] = useState([]);
   const [billingCycle, setBillingCycle] = useState('monthly');
@@ -249,7 +251,7 @@ const Pricing = () => {
     return (
       <div className="comparison-section">
         <h2>Compare Plans Details</h2>
-        <div className="comparison-table-wrapper" style={{ overflowX: 'auto' }}>
+        <div className="comparison-table-wrapper">
           <table className="comparison-table">
             <thead>
               <tr>
@@ -283,6 +285,11 @@ const Pricing = () => {
 
   return (
     <div className="pricing-page">
+      <button onClick={() => navigate(-1)} className="back-button">
+        <ArrowLeft size={18} />
+        <span>Back</span>
+      </button>
+
       <div className="pricing-header">
         <h1>Unlock Your AI Potential</h1>
         <p>Choose the perfect plan for you or your team. Upgrade anytime.</p>
@@ -374,15 +381,20 @@ const Pricing = () => {
         <div className="credit-modal-overlay">
           <div className="credit-modal">
             <div className="modal-header">
-              <h3>Out of Credits?</h3>
-              <p className="text-slate-400">Add an extra boost to your account instantly.</p>
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">Instant Credit Boost</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Extra credits for when you're on a roll!</p>
             </div>
 
             <div className="package-list">
               {packages.map((pkg) => (
-                <div key={pkg._id} className="package-item" onClick={() => handleBuyCredits(pkg)}>
-                  <span className="package-credits">+{pkg.credits} Credits</span>
-                  <span className="package-price">₹{pkg.price} <ChevronRight size={16} className="inline ml-2 opacity-50" /></span>
+                <div key={pkg._id} className="package-item group" onClick={() => handleBuyCredits(pkg)}>
+                  <div className="flex flex-col">
+                    <span className="package-credits text-lg font-bold group-hover:text-blue-500 transition-colors">+{pkg.credits} Credits</span>
+                    <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">One-time purchase</span>
+                  </div>
+                  <div className="bg-blue-500 text-white px-4 py-2 rounded-xl font-bold text-sm shadow-sm group-hover:bg-blue-600 group-hover:scale-105 transition-all">
+                    ₹{pkg.price}
+                  </div>
                 </div>
               ))}
             </div>
