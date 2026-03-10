@@ -14,7 +14,7 @@ import ErrorBoundary from './Components/ErrorBoundary';
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
   || import.meta.env.AISA_GOOGLE_CLIENT_ID
   || (typeof window !== 'undefined' && window._env_?.AISA_GOOGLE_CLIENT_ID)
-  || '';
+  || 'dummy_client_id_to_prevent_crash';
 
 const AppTree = (
   <StrictMode>

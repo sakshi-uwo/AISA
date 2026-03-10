@@ -13,7 +13,7 @@ import { getUserData } from '../userStore/userData';
 import toast from 'react-hot-toast';
 import { COOKIE_POLICY_DEFAULTS, TERMS_OF_SERVICE_DEFAULTS, PRIVACY_POLICY_DEFAULTS } from '../constants/legalDefaults';
 import AdminHelpDesk from '../Components/AdminHelpDesk';
-
+import KnowledgeUpload from '../components/KnowledgeUpload';
 const ADMIN_EMAIL = 'admin@uwo24.com';
 
 // ─── Tab Button ───
@@ -97,6 +97,8 @@ const OverviewTab = () => {
                 <StatCard icon={DollarSign} label="Total Revenue" value={`₹${stats?.totalRevenue ?? 0}`} color="amber-500" />
                 <StatCard icon={Zap} label="Credits Used" value={stats?.totalCreditsUsed ?? 0} color="violet-500" />
             </div>
+
+            <KnowledgeUpload />
 
             {stats?.toolUsage && stats.toolUsage.length > 0 && (
                 <SectionCard title="Tool Usage Analytics">
