@@ -81,8 +81,8 @@ export const apiService = {
   async generateVideo(prompt, duration = 5, quality = 'medium', aspectRatio = '16:9', modelId = 'veo-3.1-fast-generate-001', resolution = '1080p') {
     try {
       console.log(`[Frontend] Generating video for prompt: ${prompt}, Ratio: ${aspectRatio}, Model: ${modelId}, Res: ${resolution}`);
-      // Increased timeout to 120s for video generation as it takes longer
-      const response = await apiClient.post('/video/generate', { prompt, duration, quality, aspectRatio, modelId, resolution }, { timeout: 120000 });
+      // Increased timeout to 300s (5 minutes) for video generation as it regularly takes > 2 minutes
+      const response = await apiClient.post('/video/generate', { prompt, duration, quality, aspectRatio, modelId, resolution }, { timeout: 300000 });
       console.log("[Frontend] Video generation success:", response.data);
       return response.data;
     } catch (error) {
