@@ -512,33 +512,6 @@ const Sidebar = ({ isOpen, onClose }) => {
 
               </button>
 
-              {/* Credits Quick View Button */}
-              {user && (
-                <button
-                  onClick={() => {
-                    setIsProfileMenuOpen(true);
-                    // We need a way to tell the dropdown to open the credits tab.
-                    // Usually this is done via a prop or hash.
-                    // For now, I'll just open the dropdown and let the user switch,
-                    // but wait, I can probably pass a state.
-                    sessionStorage.setItem('profileTab', 'credits');
-                  }}
-                  className="w-full mt-2 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-all flex items-center justify-between p-3 group relative overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <div className="flex items-center gap-2 relative z-10">
-                    <div className="w-7 h-7 rounded-lg bg-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                      <Sparkles size={14} />
-                    </div>
-                    <div className="text-left">
-                      <p className="text-[10px] uppercase tracking-tighter font-bold text-subtext group-hover:text-primary transition-colors">Available Balance</p>
-                      <p className="text-sm font-black text-maintext tracking-tight tracking-wide">{user.credits || 0} Credits</p>
-                    </div>
-                  </div>
-                  <ChevronRight size={16} className="text-subtext group-hover:translate-x-1 transition-transform" />
-                </button>
-              )}
-
               {/* Dropdown Menu - Replaced with Personalization System */}
               <AnimatePresence>
                 {isProfileMenuOpen && (

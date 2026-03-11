@@ -74,7 +74,7 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
         if (user?.token) {
             // Fetch Plan & Transactions
             fetchTransactions();
-            
+
             // Sync user profile
             axios.get(apis.user, {
                 headers: { 'Authorization': `Bearer ${user.token}` }
@@ -205,9 +205,7 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
         { id: 'personalization', label: t('personalization'), icon: Sparkles },
         { id: 'notifications', label: t('notifications'), icon: Bell },
         { id: 'data', label: t('dataControls'), icon: Database },
-        { id: 'security', label: t('security'), icon: Shield },
-        { id: 'account', label: t('account'), icon: User },
-        { id: 'credits', label: 'Credits & Plans', icon: CreditCard },
+        { id: 'account', label: t('account'), icon: User }
     ];
 
     const renderSettingRow = (label, description, control) => (
@@ -309,7 +307,7 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
                                         <h4 className="font-bold text-sm">{n.title}</h4>
                                         <p className="text-xs text-subtext">{n.desc}</p>
                                     </div>
-                                    <button onClick={() => deleteNotification(n.id)} className="text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={14}/></button>
+                                    <button onClick={() => deleteNotification(n.id)} className="text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={14} /></button>
                                 </div>
                             )) : <div className="py-20 text-center opacity-40"><p>No notifications</p></div>}
                         </div>
@@ -318,11 +316,11 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
             case 'data':
                 return (
                     <div className="space-y-4">
-                         {allSettings.filter(s => s.tab === 'data').map(s => <div key={s.id}>{s.component}</div>)}
-                         <div className="pt-4 mt-4 border-t border-gray-100 dark:border-white/5">
+                        {allSettings.filter(s => s.tab === 'data').map(s => <div key={s.id}>{s.component}</div>)}
+                        <div className="pt-4 mt-4 border-t border-gray-100 dark:border-white/5">
                             <h4 className="text-xs font-bold text-gray-400 uppercase mb-4">Chat History</h4>
                             <div className="space-y-2 pr-2 max-h-[300px] overflow-y-auto custom-scrollbar">
-                                {Object.keys(groupedSessions).length > 0 ? Object.keys(groupedSessions).sort((a,b)=>new Date(b)-new Date(a)).map(date => (
+                                {Object.keys(groupedSessions).length > 0 ? Object.keys(groupedSessions).sort((a, b) => new Date(b) - new Date(a)).map(date => (
                                     <div key={date} className="border border-border rounded-xl bg-gray-50/50 dark:bg-zinc-800/30">
                                         <button onClick={() => setExpandedDate(expandedDate === date ? null : date)} className="w-full flex items-center justify-between p-3">
                                             <span className="text-xs font-bold">{date}</span>
@@ -341,7 +339,7 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
                                     </div>
                                 )) : <p className="text-center py-10 opacity-50">No chats found</p>}
                             </div>
-                         </div>
+                        </div>
                     </div>
                 );
             case 'security':
@@ -360,7 +358,7 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
                                     </div>
                                     <div className="flex gap-2">
                                         {acc.email !== user?.email && <button onClick={() => handleSwitchAccount(acc)} className="px-3 py-1 bg-primary/10 text-primary text-[10px] rounded-lg font-bold">Switch</button>}
-                                        <button onClick={() => handleAccountLogout(acc.email)} className="p-2 text-gray-400 hover:text-red-500 transition-colors"><LogOut size={14}/></button>
+                                        <button onClick={() => handleAccountLogout(acc.email)} className="p-2 text-gray-400 hover:text-red-500 transition-colors"><LogOut size={14} /></button>
                                     </div>
                                 </div>
                             ))}
@@ -376,7 +374,7 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
                                 <p className="font-bold">Password</p>
                                 <p className="text-xs text-subtext">Manage your account security</p>
                             </div>
-                            <button onClick={()=>setShowResetModal(true)} className="text-primary font-bold hover:underline">Change Password</button>
+                            <button onClick={() => setShowResetModal(true)} className="text-primary font-bold hover:underline">Change Password</button>
                         </div>
                     </div>
                 );
@@ -394,13 +392,13 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
                                     <h2 className="text-3xl font-black text-maintext">{planName.replace(' Plan', '')}</h2>
                                     <span className="text-xs text-subtext font-medium">/ 1 Month</span>
                                 </div>
-                                
+
                                 <div className="flex items-center justify-between bg-white/40 dark:bg-black/40 backdrop-blur-md rounded-xl p-4 border border-white/20">
                                     <div>
                                         <p className="text-[10px] font-bold text-subtext uppercase tracking-wider">Available Credits</p>
                                         <p className="text-2xl font-black text-primary">{user?.credits || 0}</p>
                                     </div>
-                                    <button onClick={()=>{window.location.href='/pricing'; onClose();}} className="px-4 py-2 bg-primary text-white rounded-lg text-xs font-bold shadow-lg shadow-primary/20 hover:opacity-90 transition-all">Buy More</button>
+                                    <button onClick={() => { window.location.href = '/pricing'; onClose(); }} className="px-4 py-2 bg-primary text-white rounded-lg text-xs font-bold shadow-lg shadow-primary/20 hover:opacity-90 transition-all">Buy More</button>
                                 </div>
                             </div>
                         </div>
@@ -411,7 +409,7 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
                                 <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Recent Credit Usage</h4>
                                 {loadingHistory && <RefreshCcw className="w-3 h-3 animate-spin text-primary" />}
                             </div>
-                            
+
                             <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                                 {creditLogs.length > 0 ? creditLogs.map(log => (
                                     <div key={log._id} className="flex items-center justify-between p-4 bg-gray-50/50 dark:bg-zinc-800/30 rounded-xl border border-border group hover:bg-white dark:hover:bg-zinc-800 transition-colors">
@@ -447,23 +445,23 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
     return createPortal(
         <AnimatePresence>
             <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-[2px]" onClick={onClose}>
-                <motion.div initial={{opacity:0, scale:0.98}} animate={{opacity:1, scale:1}} exit={{opacity:0}} className="w-full sm:max-w-[850px] h-full sm:h-[85vh] bg-white dark:bg-[#161B2E] flex flex-col sm:flex-row shadow-2xl sm:rounded-[2rem] overflow-hidden" onClick={e=>e.stopPropagation()}>
-                    <div className={`w-full sm:w-[240px] bg-gray-50 dark:bg-black/20 flex flex-col border-r border-gray-100 dark:border-white/5 ${view==='detail'?'hidden sm:flex':'flex'}`}>
+                <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="w-full sm:max-w-[850px] h-full sm:h-[85vh] bg-white dark:bg-[#161B2E] flex flex-col sm:flex-row shadow-2xl sm:rounded-[2rem] overflow-hidden" onClick={e => e.stopPropagation()}>
+                    <div className={`w-full sm:w-[240px] bg-gray-50 dark:bg-black/20 flex flex-col border-r border-gray-100 dark:border-white/5 ${view === 'detail' ? 'hidden sm:flex' : 'flex'}`}>
                         <div className="p-5 flex justify-between items-center">
                             <h2 className="text-lg font-bold">Settings</h2>
-                            <button onClick={onClose} className="sm:hidden text-subtext"><X size={20}/></button>
+                            <button onClick={onClose} className="sm:hidden text-subtext"><X size={20} /></button>
                         </div>
-                        
+
                         <div className="px-4 pb-3">
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                <input className="w-full bg-white dark:bg-white/5 border border-border rounded-xl pl-10 pr-4 py-2 text-sm outline-none focus:border-primary transition-all" placeholder="Search..." value={searchQuery} onChange={e=>setSearchQuery(e.target.value)} />
+                                <input className="w-full bg-white dark:bg-white/5 border border-border rounded-xl pl-10 pr-4 py-2 text-sm outline-none focus:border-primary transition-all" placeholder="Search..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
                             </div>
                         </div>
 
                         <nav className="flex-1 px-2 space-y-1 overflow-y-auto">
                             {tabs.map(tab => (
-                                <button key={tab.id} onClick={()=>{setActiveTab(tab.id); setView('detail');}} className={`w-full flex items-center gap-3 px-4 py-3 sm:py-2.5 rounded-xl text-sm transition-all ${activeTab===tab.id?'bg-white dark:bg-[#1E2438] shadow-sm text-primary':'text-subtext hover:bg-gray-100 dark:hover:bg-white/5'}`}>
+                                <button key={tab.id} onClick={() => { setActiveTab(tab.id); setView('detail'); }} className={`w-full flex items-center gap-3 px-4 py-3 sm:py-2.5 rounded-xl text-sm transition-all ${activeTab === tab.id ? 'bg-white dark:bg-[#1E2438] shadow-sm text-primary' : 'text-subtext hover:bg-gray-100 dark:hover:bg-white/5'}`}>
                                     <tab.icon className="w-4 h-4" />
                                     <span className="font-bold">{tab.label}</span>
                                     <ChevronRight className="w-4 h-4 ml-auto sm:hidden opacity-50" />
@@ -472,7 +470,7 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
                         </nav>
 
                         <div className="p-4 space-y-1 border-t border-gray-100 dark:border-white/5">
-                            <button 
+                            <button
                                 onClick={() => { setActiveTab('credits'); setView('detail'); }}
                                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:opacity-90 shadow-md shadow-cyan-500/20 mb-1"
                             >
@@ -482,13 +480,13 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
                         </div>
                     </div>
 
-                    <div className={`flex-1 flex flex-col min-w-0 bg-white dark:bg-[#161B2E] overflow-hidden ${view==='sidebar'?'hidden sm:flex':'flex'}`}>
+                    <div className={`flex-1 flex flex-col min-w-0 bg-white dark:bg-[#161B2E] overflow-hidden ${view === 'sidebar' ? 'hidden sm:flex' : 'flex'}`}>
                         <div className="px-5 py-4 sm:px-8 sm:py-6 flex items-center justify-between border-b sm:border-b-0 border-gray-100 dark:border-white/5 shrink-0">
                             <div className="flex items-center gap-3">
-                                <button onClick={()=>setView('sidebar')} className="sm:hidden p-1 hover:bg-black/5 rounded-full"><ChevronLeft size={24}/></button>
-                                <h2 className="text-lg sm:text-xl font-bold">{searchQuery ? 'Search Results' : tabs.find(t=>t.id===activeTab)?.label}</h2>
+                                <button onClick={() => setView('sidebar')} className="sm:hidden p-1 hover:bg-black/5 rounded-full"><ChevronLeft size={24} /></button>
+                                <h2 className="text-lg sm:text-xl font-bold">{searchQuery ? 'Search Results' : tabs.find(t => t.id === activeTab)?.label}</h2>
                             </div>
-                            <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-full"><X size={20} className="text-gray-400"/></button>
+                            <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-full"><X size={20} className="text-gray-400" /></button>
                         </div>
                         <div className="flex-1 overflow-y-auto px-5 sm:px-8 pb-10 custom-scrollbar">{renderContent()}</div>
                     </div>
@@ -497,8 +495,8 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
 
             {/* Password Reset Modal */}
             {showResetModal && (
-                <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={()=>setShowResetModal(false)}>
-                    <motion.div initial={{opacity:0, scale:0.95}} animate={{opacity:1, scale:1}} className="bg-white dark:bg-[#1E2438] p-6 rounded-2xl w-full max-w-sm shadow-2xl" onClick={e=>e.stopPropagation()}>
+                <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowResetModal(false)}>
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white dark:bg-[#1E2438] p-6 rounded-2xl w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
                         <h3 className="text-lg font-bold mb-4">Reset Password</h3>
                         {resetStep === 1 ? (
                             <button onClick={handleSendOtp} disabled={resetLoading} className="w-full bg-primary text-white py-3 rounded-xl font-bold shadow-lg shadow-primary/20 disabled:opacity-50">
@@ -506,8 +504,8 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
                             </button>
                         ) : (
                             <div className="space-y-4">
-                                <input type="text" placeholder="Enter OTP" value={resetOtp} onChange={e=>setResetOtp(e.target.value)} className="w-full p-3 bg-gray-50 border rounded-xl outline-none" />
-                                <input type="password" placeholder="New Password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} className="w-full p-3 bg-gray-50 border rounded-xl outline-none" />
+                                <input type="text" placeholder="Enter OTP" value={resetOtp} onChange={e => setResetOtp(e.target.value)} className="w-full p-3 bg-gray-50 border rounded-xl outline-none" />
+                                <input type="password" placeholder="New Password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="w-full p-3 bg-gray-50 border rounded-xl outline-none" />
                                 <button onClick={handleResetPassword} disabled={resetLoading} className="w-full bg-primary text-white py-3 rounded-xl font-bold shadow-lg shadow-primary/20">
                                     {resetLoading ? 'Updating...' : 'Update Password'}
                                 </button>
@@ -516,7 +514,7 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
                     </motion.div>
                 </div>
             )}
-        </AnimatePresence>, 
+        </AnimatePresence>,
         document.body
     );
 };
