@@ -1030,7 +1030,7 @@ const Chat = () => {
           toast.success('Generated preview image');
         }
       } catch (error) {
-        const errorMsg = error.response?.data?.message || 'Failed to generate video';
+        const errorMsg = error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to generate video';
 
         // If we got an image URL even with error (sometimes happens with 200 fallback but let's be safe)
         if (error.response?.data?.imageUrl) {
@@ -1045,7 +1045,7 @@ const Chat = () => {
           return;
         }
 
-        setMessages(prev => prev.map(msg => msg.id === tempId ? { ...msg, content: `❌ ${errorMsg}` } : msg));
+        setMessages(prev => prev.map(msg => msg.id === tempId ? { ...msg, isGenerating: false, content: `❌ ${errorMsg}` } : msg));
         toast.error(errorMsg);
       }
     } catch (error) {
