@@ -298,15 +298,27 @@ const Pricing = () => {
           <span className={`billing-label ${billingCycle === 'monthly' ? 'active' : ''}`}>Monthly</span>
           <div className={`toggle-switch ${billingCycle}`} onClick={handleToggle}></div>
           <span className={`billing-label ${billingCycle === 'yearly' ? 'active' : ''}`}>Yearly</span>
-          <span className="save-badge">Save ~30%</span>
+          {billingCycle === 'yearly' && <span className="save-badge">Save ~30%</span>}
         </div>
       </div>
 
       <div className="pricing-grid">
         {plans.map((plan) => {
-          const isFounder = plan.planName.toLowerCase() === 'founder plan';
+          const isFounder = plan.planName.toLowerCase().includes('founder');
           const isFree = plan.priceMonthly === 0 && plan.priceYearly === 0;
-          const price = billingCycle === 'yearly' ? plan.priceYearly : plan.priceMonthly;
+
+          // Fetch values straight from the Database
+          let displayPrice = plan.priceMonthly;
+          let totalYearlyAmount = 0;
+
+          if (billingCycle === 'yearly' && !isFree && !isFounder) {
+            // DB contains the total 12-month amount in priceYearly
+            totalYearlyAmount = plan.priceYearly;
+            // Calculate the per-month breakdown just for display purposes
+            displayPrice = Math.round(plan.priceYearly / 12);
+          }
+
+          const displayCredits = (billingCycle === 'yearly' && plan.creditsYearly) ? plan.creditsYearly : plan.credits;
 
           return (
             <div key={plan._id} className={`pricing-card ${plan.isPopular ? 'popular' : ''} ${isFree ? 'free-tier-card' : ''}`}>
@@ -322,19 +334,24 @@ const Pricing = () => {
               <h3 className="plan-name">{plan.planName}</h3>
 
               <div className="plan-price">
+                {billingCycle === 'yearly' && !isFree && !isFounder && (
+                  <span style={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '0.5em', marginRight: '6px' }}>
+                    ₹{plan.priceMonthly}
+                  </span>
+                )}
                 <span className="currency">₹</span>
-                {price}
+                {displayPrice}
                 <span className="billing-period">
                   {isFounder ? '/mo (lifetime)' : billingCycle === 'yearly' ? '/mo (billed yearly)' : '/mo'}
                 </span>
               </div>
 
               <div className="plan-credits">
-                <Sparkles size={18} /> {plan.credits} Credits
+                <Sparkles size={18} /> {displayCredits} Credits
               </div>
 
               <div className="credit-details">
-                {calculateEstimations(plan.credits, isFree).map((est, i) => (
+                {calculateEstimations(displayCredits, isFree).map((est, i) => (
                   <p key={i} className={est.locked ? 'locked-estimation' : ''}>
                     <span style={{ opacity: est.locked ? 0.4 : 1 }}>{est.icon}</span>
                     <span style={{ opacity: est.locked ? 0.4 : 1 }}>{est.text}</span>
@@ -358,7 +375,11 @@ const Pricing = () => {
                 onClick={() => handleUpgrade(plan)}
                 disabled={processing}
               >
-                {price === 0 ? 'Start for Free' : 'Upgrade to ' + plan.planName}
+                {displayPrice === 0
+                  ? 'Start for Free'
+                  : (billingCycle === 'yearly' && !isFounder)
+                    ? `Upgrade for ₹${totalYearlyAmount}/yr`
+                    : 'Upgrade to ' + plan.planName}
               </button>
             </div>
           );

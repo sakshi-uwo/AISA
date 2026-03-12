@@ -169,7 +169,8 @@
   display: flex !important;
   flex-direction: row !important;
   flex-wrap: nowrap !important;
-  gap: 12px; /* Reduced from 15px */
+  gap: 12px;
+  /* Reduced from 15px */
   max-width: 1600px;
   margin: 0 auto;
   padding: 10px 10px 20px;
@@ -180,11 +181,13 @@
 .pricing-card {
   flex: 1;
   min-width: 0;
-  max-width: 270px; /* Reduced further for a thinner look */
+  max-width: 270px;
+  /* Reduced further for a thinner look */
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 16px;
-  padding: 12px 12px 10px; /* Tightened padding */
+  padding: 12px 12px 10px;
+  /* Tightened padding */
   position: relative;
   display: flex;
   flex-direction: column;
@@ -518,7 +521,8 @@
 .dark .comparison-table th:first-child,
 .dark .comparison-table td:first-child {
   color: #e2e8f0;
-  background-color: #1a2333; /* Matches the dark theme */
+  background-color: #1a2333;
+  /* Matches the dark theme */
   border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -691,7 +695,7 @@
     justify-content: flex-start;
     padding-bottom: 20px;
   }
-  
+
   .pricing-card {
     min-width: 250px;
     flex: 0 0 auto;
@@ -702,14 +706,17 @@
   .pricing-grid {
     display: flex !important;
     flex-direction: column !important;
-    max-width: 320px;
+    max-width: 450px;
+    width: 100%;
     margin-left: auto;
     margin-right: auto;
-    gap: 12px;
+    gap: 16px;
+    padding: 10px 15px;
   }
-  
+
   .pricing-card {
-    padding: 10px;
+    max-width: 100%;
+    padding: 18px;
   }
 
   .cta-button {
@@ -726,13 +733,14 @@
   }
 
   .comparison-table {
-    min-width: 500px; /* Reduced to fit more content on screen */
+    min-width: 500px;
+    /* Reduced to fit more content on screen */
     width: 100%;
-    border-collapse: separate; 
+    border-collapse: separate;
     border-spacing: 0;
     table-layout: auto;
   }
-  
+
   .comparison-table th {
     white-space: normal !important;
     word-break: break-word;
@@ -748,16 +756,16 @@
     font-size: 0.7rem;
     min-width: 70px;
   }
-  
+
   .comparison-table th:first-child,
   .comparison-table td:first-child {
     padding-left: 8px;
     font-size: 0.75rem;
     min-width: 90px;
     z-index: 25;
-    box-shadow: 4px 0 10px rgba(0,0,0,0.12);
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.12);
   }
-  
+
   .comparison-table-wrapper::after {
     content: "← Scroll to see all plans →";
     display: block;
@@ -767,14 +775,14 @@
     padding: 8px 0;
     font-weight: 700;
     background: #f8fafc;
-    border-top: 1px solid rgba(0,0,0,0.05);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
   }
-  
+
   .dark .comparison-table-wrapper::after {
     background: #111827;
     color: #4b5563;
   }
-  
+
   .dark .comparison-table th:first-child,
   .dark .comparison-table td:first-child {
     background-color: #111827 !important;
@@ -789,11 +797,11 @@
   .pricing-page {
     padding: 20px 12px;
   }
-  
+
   .pricing-header h1 {
     font-size: 1.4rem;
   }
-  
+
   .comparison-section h2 {
     font-size: 1.4rem;
   }

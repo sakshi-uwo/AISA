@@ -2769,21 +2769,28 @@ ${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
       const file = pregeneratedPdfs[msg.id];
 
       if (action === 'copy') {
-        if (!window.ClipboardItem) {
-          toast.error("Iss browser mein direct file copy supported nahi hai. Download ya Share use karein.");
-          return;
-        }
         try {
-          // Wrap in Promise for better compatibility
+          if (!window.ClipboardItem) throw new Error("ClipboardItem not supported");
+
+          const cleanText = msg.content
+            .replace(/\*\*(.*?)\*\*/g, '$1')
+            .replace(/### (.*)/g, '$1')
+            .replace(/\[(.*?)\]\((.*?)\)/g, '$1 ($2)');
+
+          // We try to put both PDF and Text in the clipboard
+          // Apps like WhatsApp Desktop might pick the PDF, others will pick the text
           const item = new ClipboardItem({
-            [file.type || 'application/pdf']: Promise.resolve(file)
+            ['application/pdf']: Promise.resolve(file),
+            ['text/plain']: new Blob([cleanText], { type: 'text/plain' })
           });
+
           await navigator.clipboard.write([item]);
-          toast.success("PDF file copy ho gayi! 📋 Ab aap ise WhatsApp ya folder mein paste kar sakte hain.");
+          toast.success("PDF aur Text copy ho gaya! 📋 Ab aap WhatsApp ya kisi bhi app mein Paste kar sakte hain.");
           return;
         } catch (err) {
-          console.error("Copy failed:", err);
-          toast.error("File copy nahi ho saki. Browser file permission check karein.");
+          console.warn("Direct PDF copy failed, falling back to text only:", err);
+          await navigator.clipboard.writeText(msg.content);
+          toast.success("Text copy ho gaya! (PDF copy browser mein limited hai)");
           return;
         }
       }
@@ -2903,36 +2910,62 @@ ${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
 
       let canvas;
       try {
-        canvas = await html2canvas(element, {
+        // Create an unconstrained wrapper to prevent screen-size clipping
+        const tempWrapper = document.createElement('div');
+        tempWrapper.style.position = 'absolute';
+        tempWrapper.style.left = '-9999px';
+        tempWrapper.style.top = '-9999px';
+        tempWrapper.style.width = '800px'; // Fixed desktop-like width for consistency
+        tempWrapper.style.backgroundColor = '#ffffff';
+
+        // Clone the content
+        const clonedContent = element.cloneNode(true);
+        clonedContent.id = `temp-pdf-${msg.id}`;
+
+        // Add Header
+        const header = document.createElement('div');
+        header.style.marginBottom = '20px';
+        header.style.paddingBottom = '10px';
+        header.style.borderBottom = '1px solid #eee';
+        header.style.fontSize = '12px';
+        header.style.color = '#888';
+        header.style.fontWeight = 'bold';
+        header.innerText = 'AISA AI RESPONSE';
+
+        tempWrapper.appendChild(header);
+
+        // Ensure all text in clone is black and wrapping properly
+        clonedContent.style.padding = '20px';
+        clonedContent.style.color = '#000000';
+        clonedContent.style.backgroundColor = '#ffffff';
+        clonedContent.style.width = '100%';
+        clonedContent.style.lineHeight = '1.4';
+
+        const all = clonedContent.querySelectorAll('*');
+        Array.from(all).forEach(el => {
+          el.style.color = '#000000';
+          if (el.tagName === 'P') el.style.marginBottom = '6px';
+          if (el.tagName === 'A') el.style.color = '#0000ff';
+        });
+
+        tempWrapper.appendChild(clonedContent);
+        document.body.appendChild(tempWrapper);
+
+        // Wait a tiny bit for styles to apply
+        await new Promise(r => setTimeout(r, 100));
+
+        // Generate canvas from the unconstrained clone
+        canvas = await html2canvas(tempWrapper, {
           scale: 2,
           useCORS: true,
           backgroundColor: '#ffffff',
-          onclone: (clonedDoc) => {
-            const clonedEl = clonedDoc.getElementById(`msg-text-${msg.id}`);
-            if (clonedEl) {
-              const header = clonedDoc.createElement('div');
-              header.style.marginBottom = '20px';
-              header.style.paddingBottom = '10px';
-              header.style.borderBottom = '1px solid #eee';
-              header.style.fontSize = '12px';
-              header.style.color = '#888';
-              header.style.fontWeight = 'bold';
-              header.innerText = 'AISA AI RESPONSE';
-              clonedEl.insertBefore(header, clonedEl.firstChild);
-              clonedEl.style.padding = '20px';
-              clonedEl.style.color = '#000000';
-              clonedEl.style.backgroundColor = '#ffffff';
-              clonedEl.style.width = '800px';
-              clonedEl.style.lineHeight = '1.4';
-              const all = clonedEl.querySelectorAll('*');
-              Array.from(all).forEach(el => {
-                el.style.color = '#000000';
-                if (el.tagName === 'P') el.style.marginBottom = '6px';
-                if (el.tagName === 'A') el.style.color = '#0000ff';
-              });
-            }
-          }
+          windowWidth: 800, // Force window width awareness
+          logging: false
         });
+
+        // Cleanup
+        document.body.removeChild(tempWrapper);
+
       } catch (genError) {
         if (processToastId) toast.error(`Canvas Error: ${genError.message}`, { id: processToastId });
         setPdfLoadingId(null);
@@ -3052,16 +3085,26 @@ ${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
         window.open(url, '_blank');
         if (processToastId) toast.dismiss(processToastId);
       } else if (action === 'copy') {
-        if (!window.ClipboardItem) {
-          toast.error("Iss browser mein direct file copy supported nahi hai.");
-          if (processToastId) toast.dismiss(processToastId);
-          return;
+        try {
+          if (!window.ClipboardItem) throw new Error("ClipboardItem not supported");
+
+          const cleanText = msg.content
+            .replace(/\*\*(.*?)\*\*/g, '$1')
+            .replace(/### (.*)/g, '$1')
+            .replace(/\[(.*?)\]\((.*?)\)/g, '$1 ($2)');
+
+          const item = new ClipboardItem({
+            ['application/pdf']: Promise.resolve(blob),
+            ['text/plain']: new Blob([cleanText], { type: 'text/plain' })
+          });
+
+          await navigator.clipboard.write([item]);
+          if (processToastId) toast.success("PDF aur Text copy ho gaya! 📋", { id: processToastId });
+        } catch (err) {
+          console.warn("Binary copy failed:", err);
+          await navigator.clipboard.writeText(msg.content);
+          if (processToastId) toast.success("Text copy ho gaya!", { id: processToastId });
         }
-        const item = new ClipboardItem({
-          ['application/pdf']: Promise.resolve(blob)
-        });
-        await navigator.clipboard.write([item]);
-        if (processToastId) toast.success("PDF file copy ho gayi! 📋", { id: processToastId });
       } else if (action === 'share') {
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
@@ -3120,14 +3163,15 @@ ${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
     const lastMsg = messages[messages.length - 1];
     if (!lastMsg || lastMsg.role !== 'model' || !lastMsg.content) return;
     if (pregeneratedPdfs[lastMsg.id]) return; // Already generated
+    if (typingMessageId === lastMsg.id) return; // Wait for typing animation to finish
 
-    // Wait 1.5s for DOM to render, then silently pre-generate
+    // Wait 1.5s for DOM to fully render, then silently pre-generate
     const timer = setTimeout(() => {
       handlePdfAction('pregenerate', lastMsg);
     }, 1500);
 
     return () => clearTimeout(timer);
-  }, [messages]);
+  }, [messages, typingMessageId, pregeneratedPdfs]);
 
   const handleThumbsDown = (msgId) => {
     setFeedbackMsgId(msgId);
@@ -3179,20 +3223,58 @@ ${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
       const element = document.getElementById(`msg-text-${msg.id}`);
       if (!element) { toast.error("Content not found", { id: toastId }); return; }
 
-      const canvas = await html2canvas(element, {
-        scale: 2, useCORS: true, backgroundColor: '#ffffff',
-        onclone: (clonedDoc) => {
-          const el = clonedDoc.getElementById(`msg-text-${msg.id}`);
-          if (el) {
-            const hdr = clonedDoc.createElement('div');
-            hdr.style.cssText = 'margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid #eee;font-size:12px;color:#888;font-weight:bold;';
-            hdr.innerText = 'AISA AI RESPONSE';
-            el.insertBefore(hdr, el.firstChild);
-            el.style.cssText = 'padding:20px;color:#000;background:#fff;width:800px;line-height:1.4;';
-            el.querySelectorAll('*').forEach(e => { e.style.color = '#000'; });
-          }
-        }
+      // Create an unconstrained wrapper to prevent screen-size clipping
+      const tempWrapper = document.createElement('div');
+      tempWrapper.style.position = 'absolute';
+      tempWrapper.style.left = '-9999px';
+      tempWrapper.style.top = '-9999px';
+      tempWrapper.style.width = '800px'; // Fixed desktop width
+      tempWrapper.style.backgroundColor = '#ffffff';
+
+      // Clone the content
+      const clonedContent = element.cloneNode(true);
+      clonedContent.id = `temp-wa-pdf-${msg.id}`;
+
+      // Add Header
+      const header = document.createElement('div');
+      header.style.marginBottom = '20px';
+      header.style.paddingBottom = '10px';
+      header.style.borderBottom = '1px solid #eee';
+      header.style.fontSize = '12px';
+      header.style.color = '#888';
+      header.style.fontWeight = 'bold';
+      header.innerText = 'AISA AI RESPONSE';
+
+      tempWrapper.appendChild(header);
+
+      clonedContent.style.padding = '20px';
+      clonedContent.style.color = '#000000';
+      clonedContent.style.backgroundColor = '#ffffff';
+      clonedContent.style.width = '100%';
+      clonedContent.style.lineHeight = '1.4';
+
+      const all = clonedContent.querySelectorAll('*');
+      Array.from(all).forEach(el => {
+        el.style.color = '#000000';
+        if (el.tagName === 'P') el.style.marginBottom = '6px';
+        if (el.tagName === 'A') el.style.color = '#0000ff';
       });
+
+      tempWrapper.appendChild(clonedContent);
+      document.body.appendChild(tempWrapper);
+
+      // Wait a tiny bit for styles to apply
+      await new Promise(r => setTimeout(r, 100));
+
+      const canvas = await html2canvas(tempWrapper, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        windowWidth: 800,
+        logging: false
+      });
+
+      document.body.removeChild(tempWrapper);
 
       // ===== SMART PER-PAGE SLICING (for WhatsApp) =====
       const pdf = new jsPDF('p', 'mm', 'a4');
@@ -4515,35 +4597,20 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                                     <Share className="w-3.5 h-3.5" />
                                   </button>
 
-                                  {/* PDF Tools */}
-                                  <div className="flex items-center gap-1 border-l border-zinc-200 dark:border-zinc-800 ml-2 pl-2">
-                                    {/* Copy PDF - NEW */}
-                                    <button
-                                      onClick={() => handlePdfAction('copy', msg)}
-                                      onMouseEnter={() => handlePdfAction('pregenerate', msg)}
-                                      onFocus={() => handlePdfAction('pregenerate', msg)}
-                                      className="text-subtext hover:text-primary transition-all p-1.5 hover:bg-surface-hover rounded-lg flex items-center gap-1 active:scale-95"
-                                      title="Copy PDF File"
-                                    >
-                                      <Copy className="w-3.5 h-3.5" />
-                                    </button>
-
-                                    {/* PDF Share — Direct 1-click */}
-                                    <button
-                                      onClick={() => handlePdfAction('share', msg)}
-                                      onMouseEnter={() => handlePdfAction('pregenerate', msg)}
-                                      onFocus={() => handlePdfAction('pregenerate', msg)}
-                                      className="text-red-500 hover:text-red-600 transition-all p-1.5 hover:bg-red-50/10 rounded-lg flex items-center gap-1 active:scale-95"
-                                      title={pregeneratedPdfs[msg.id] ? "Share PDF ✓ Ready" : "Share PDF"}
-                                    >
-                                      <FileText className="w-4 h-4" />
-                                      {pdfLoadingId === msg.id && !pregeneratedPdfs[msg.id] ? (
-                                        <div className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-                                      ) : pregeneratedPdfs[msg.id] ? (
+                                  {/* PDF Tools — Only show when fully ready (no pulsing dots) */}
+                                  {pregeneratedPdfs[msg.id] && (
+                                    <div className="flex items-center gap-1 border-l border-zinc-200 dark:border-zinc-800 ml-2 pl-2 animate-in fade-in zoom-in duration-300">
+                                      {/* PDF Share — Direct 1-click */}
+                                      <button
+                                        onClick={() => handlePdfAction('share', msg)}
+                                        className="text-red-500 hover:text-red-600 transition-all p-1.5 hover:bg-red-50/10 rounded-lg flex items-center gap-1 active:scale-95"
+                                        title="Share / Download PDF ✓ Ready"
+                                      >
+                                        <FileText className="w-4 h-4" />
                                         <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                                      ) : null}
-                                    </button>
-                                  </div>
+                                      </button>
+                                    </div>
+                                  )}
                                 </div>
 
 
