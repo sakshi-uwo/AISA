@@ -307,18 +307,10 @@ const Pricing = () => {
           const isFounder = plan.planName.toLowerCase().includes('founder');
           const isFree = plan.priceMonthly === 0 && plan.priceYearly === 0;
 
-          // Fetch values straight from the Database
-          let displayPrice = plan.priceMonthly;
-          let totalYearlyAmount = 0;
-
-          if (billingCycle === 'yearly' && !isFree && !isFounder) {
-            // DB contains the total 12-month amount in priceYearly
-            totalYearlyAmount = plan.priceYearly;
-            // Calculate the per-month breakdown just for display purposes
-            displayPrice = Math.round(plan.priceYearly / 12);
-          }
-
-          const displayCredits = (billingCycle === 'yearly' && plan.creditsYearly) ? plan.creditsYearly : plan.credits;
+          // Fetch ALL values directly from the Database (no frontend math)
+          const displayPrice = billingCycle === 'yearly' ? (plan.priceYearlyPerMonth || plan.priceMonthly) : plan.priceMonthly;
+          const displayCredits = billingCycle === 'yearly' ? (plan.creditsYearly || plan.credits) : plan.credits;
+          const totalYearlyAmount = plan.priceYearly || 0;
 
           return (
             <div key={plan._id} className={`pricing-card ${plan.isPopular ? 'popular' : ''} ${isFree ? 'free-tier-card' : ''}`}>
@@ -334,7 +326,7 @@ const Pricing = () => {
               <h3 className="plan-name">{plan.planName}</h3>
 
               <div className="plan-price">
-                {billingCycle === 'yearly' && !isFree && !isFounder && (
+                {billingCycle === 'yearly' && !isFree && (
                   <span style={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '0.5em', marginRight: '6px' }}>
                     ₹{plan.priceMonthly}
                   </span>
@@ -342,7 +334,7 @@ const Pricing = () => {
                 <span className="currency">₹</span>
                 {displayPrice}
                 <span className="billing-period">
-                  {isFounder ? '/mo (lifetime)' : billingCycle === 'yearly' ? '/mo (billed yearly)' : '/mo'}
+                  {billingCycle === 'yearly' ? (isFounder ? '/mo (lifetime, billed yearly)' : '/mo (billed yearly)') : (isFounder ? '/mo (lifetime)' : '/mo')}
                 </span>
               </div>
 
@@ -377,7 +369,7 @@ const Pricing = () => {
               >
                 {displayPrice === 0
                   ? 'Start for Free'
-                  : (billingCycle === 'yearly' && !isFounder)
+                  : (billingCycle === 'yearly')
                     ? `Upgrade for ₹${totalYearlyAmount}/yr`
                     : 'Upgrade to ' + plan.planName}
               </button>

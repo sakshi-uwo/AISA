@@ -81,6 +81,9 @@
 
 .dark .pricing-header h1 {
   background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .pricing-header p {
