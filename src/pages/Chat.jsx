@@ -2907,36 +2907,62 @@ ${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
 
       let canvas;
       try {
-        canvas = await html2canvas(element, {
+        // Create an unconstrained wrapper to prevent screen-size clipping
+        const tempWrapper = document.createElement('div');
+        tempWrapper.style.position = 'absolute';
+        tempWrapper.style.left = '-9999px';
+        tempWrapper.style.top = '-9999px';
+        tempWrapper.style.width = '800px'; // Fixed desktop-like width for consistency
+        tempWrapper.style.backgroundColor = '#ffffff';
+
+        // Clone the content
+        const clonedContent = element.cloneNode(true);
+        clonedContent.id = `temp-pdf-${msg.id}`;
+
+        // Add Header
+        const header = document.createElement('div');
+        header.style.marginBottom = '20px';
+        header.style.paddingBottom = '10px';
+        header.style.borderBottom = '1px solid #eee';
+        header.style.fontSize = '12px';
+        header.style.color = '#888';
+        header.style.fontWeight = 'bold';
+        header.innerText = 'AISA AI RESPONSE';
+
+        tempWrapper.appendChild(header);
+
+        // Ensure all text in clone is black and wrapping properly
+        clonedContent.style.padding = '20px';
+        clonedContent.style.color = '#000000';
+        clonedContent.style.backgroundColor = '#ffffff';
+        clonedContent.style.width = '100%';
+        clonedContent.style.lineHeight = '1.4';
+
+        const all = clonedContent.querySelectorAll('*');
+        Array.from(all).forEach(el => {
+          el.style.color = '#000000';
+          if (el.tagName === 'P') el.style.marginBottom = '6px';
+          if (el.tagName === 'A') el.style.color = '#0000ff';
+        });
+
+        tempWrapper.appendChild(clonedContent);
+        document.body.appendChild(tempWrapper);
+
+        // Wait a tiny bit for styles to apply
+        await new Promise(r => setTimeout(r, 100));
+
+        // Generate canvas from the unconstrained clone
+        canvas = await html2canvas(tempWrapper, {
           scale: 2,
           useCORS: true,
           backgroundColor: '#ffffff',
-          onclone: (clonedDoc) => {
-            const clonedEl = clonedDoc.getElementById(`msg-text-${msg.id}`);
-            if (clonedEl) {
-              const header = clonedDoc.createElement('div');
-              header.style.marginBottom = '20px';
-              header.style.paddingBottom = '10px';
-              header.style.borderBottom = '1px solid #eee';
-              header.style.fontSize = '12px';
-              header.style.color = '#888';
-              header.style.fontWeight = 'bold';
-              header.innerText = 'AISA AI RESPONSE';
-              clonedEl.insertBefore(header, clonedEl.firstChild);
-              clonedEl.style.padding = '20px';
-              clonedEl.style.color = '#000000';
-              clonedEl.style.backgroundColor = '#ffffff';
-              clonedEl.style.width = '800px';
-              clonedEl.style.lineHeight = '1.4';
-              const all = clonedEl.querySelectorAll('*');
-              Array.from(all).forEach(el => {
-                el.style.color = '#000000';
-                if (el.tagName === 'P') el.style.marginBottom = '6px';
-                if (el.tagName === 'A') el.style.color = '#0000ff';
-              });
-            }
-          }
+          windowWidth: 800, // Force window width awareness
+          logging: false
         });
+
+        // Cleanup
+        document.body.removeChild(tempWrapper);
+
       } catch (genError) {
         if (processToastId) toast.error(`Canvas Error: ${genError.message}`, { id: processToastId });
         setPdfLoadingId(null);
@@ -3194,20 +3220,58 @@ ${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
       const element = document.getElementById(`msg-text-${msg.id}`);
       if (!element) { toast.error("Content not found", { id: toastId }); return; }
 
-      const canvas = await html2canvas(element, {
-        scale: 2, useCORS: true, backgroundColor: '#ffffff',
-        onclone: (clonedDoc) => {
-          const el = clonedDoc.getElementById(`msg-text-${msg.id}`);
-          if (el) {
-            const hdr = clonedDoc.createElement('div');
-            hdr.style.cssText = 'margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid #eee;font-size:12px;color:#888;font-weight:bold;';
-            hdr.innerText = 'AISA AI RESPONSE';
-            el.insertBefore(hdr, el.firstChild);
-            el.style.cssText = 'padding:20px;color:#000;background:#fff;width:800px;line-height:1.4;';
-            el.querySelectorAll('*').forEach(e => { e.style.color = '#000'; });
-          }
-        }
+      // Create an unconstrained wrapper to prevent screen-size clipping
+      const tempWrapper = document.createElement('div');
+      tempWrapper.style.position = 'absolute';
+      tempWrapper.style.left = '-9999px';
+      tempWrapper.style.top = '-9999px';
+      tempWrapper.style.width = '800px'; // Fixed desktop width
+      tempWrapper.style.backgroundColor = '#ffffff';
+
+      // Clone the content
+      const clonedContent = element.cloneNode(true);
+      clonedContent.id = `temp-wa-pdf-${msg.id}`;
+
+      // Add Header
+      const header = document.createElement('div');
+      header.style.marginBottom = '20px';
+      header.style.paddingBottom = '10px';
+      header.style.borderBottom = '1px solid #eee';
+      header.style.fontSize = '12px';
+      header.style.color = '#888';
+      header.style.fontWeight = 'bold';
+      header.innerText = 'AISA AI RESPONSE';
+
+      tempWrapper.appendChild(header);
+
+      clonedContent.style.padding = '20px';
+      clonedContent.style.color = '#000000';
+      clonedContent.style.backgroundColor = '#ffffff';
+      clonedContent.style.width = '100%';
+      clonedContent.style.lineHeight = '1.4';
+
+      const all = clonedContent.querySelectorAll('*');
+      Array.from(all).forEach(el => {
+        el.style.color = '#000000';
+        if (el.tagName === 'P') el.style.marginBottom = '6px';
+        if (el.tagName === 'A') el.style.color = '#0000ff';
       });
+
+      tempWrapper.appendChild(clonedContent);
+      document.body.appendChild(tempWrapper);
+
+      // Wait a tiny bit for styles to apply
+      await new Promise(r => setTimeout(r, 100));
+
+      const canvas = await html2canvas(tempWrapper, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        windowWidth: 800,
+        logging: false
+      });
+
+      document.body.removeChild(tempWrapper);
 
       // ===== SMART PER-PAGE SLICING (for WhatsApp) =====
       const pdf = new jsPDF('p', 'mm', 'a4');
