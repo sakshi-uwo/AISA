@@ -59,8 +59,12 @@ const AboutAISA = ({ isOpen, onClose }) => {
                     <div className="absolute top-[-50%] left-[-20%] w-[500px] h-[500px] bg-blue-400/30 rounded-full blur-[80px]" />
 
                     <button
-                        onClick={onClose}
-                        className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-md transition-colors"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onClose();
+                        }}
+                        className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-md transition-colors z-50 cursor-pointer"
+                        aria-label="Close"
                     >
                         <X className="w-6 h-6 text-white" />
                     </button>
