@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { UploadCloud, File, CheckCircle, X, Loader, Trash2, ExternalLink } from 'lucide-react';
+import { apiService } from '../services/apiService';
 import { API } from '../types';
 
 const KnowledgeUpload = ({ onUploadSuccess }) => {
@@ -19,9 +20,9 @@ const KnowledgeUpload = ({ onUploadSuccess }) => {
     const fetchDocuments = useCallback(async () => {
         setIsLoadingDocs(true);
         try {
-            const res = await axios.get(`${API}/aibase/knowledge/documents`);
-            if (res.data.success) {
-                setDocuments(res.data.data);
+            const data = await apiService.getKnowledgeDocuments();
+            if (data.success) {
+                setDocuments(data.data);
             }
         } catch (error) {
             console.error("Failed to fetch documents", error);
@@ -42,7 +43,7 @@ const KnowledgeUpload = ({ onUploadSuccess }) => {
         if (!documentToDelete) return;
         setIsDeleting(true);
         try {
-            await axios.delete(`${API}/aibase/knowledge/${documentToDelete._id}`);
+            await apiService.deleteKnowledgeDocument(documentToDelete._id);
             fetchDocuments();
             setDocumentToDelete(null);
         } catch (error) {
@@ -105,21 +106,14 @@ const KnowledgeUpload = ({ onUploadSuccess }) => {
         formData.append('file', file);
 
         try {
-            const uploadEndpoint = `${API}/aibase/knowledge/upload`;
-            const response = await axios.post(uploadEndpoint, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-                onUploadProgress: (progressEvent) => {
-                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                    setUploadProgress(percentCompleted);
-                },
+            const data = await apiService.uploadKnowledgeDocument(formData, (percent) => {
+                setUploadProgress(percent);
             });
 
-            if (response.data.success) {
+            if (data.success) {
                 setUploadStatus('success');
                 fetchDocuments();
-                if (onUploadSuccess) onUploadSuccess(response.data.data);
+                if (onUploadSuccess) onUploadSuccess(data.data);
             }
         } catch (error) {
             setUploadStatus('error');
