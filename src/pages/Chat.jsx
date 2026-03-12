@@ -2179,11 +2179,9 @@ const Chat = () => {
 
       // Capture mode states before resetting
       const deepSearchActive = isDeepSearch;
-      if (isDeepSearch) setIsDeepSearch(false);
       const documentConvertActive = isDocumentConvert;
-      if (isDocumentConvert) setIsDocumentConvert(false);
       const webSearchActive = isWebSearch;
-      if (isWebSearch) setIsWebSearch(false);
+      // Note: We don't reset these state immediately anymore so the tag stays visible in input bar while "Thinking..."
 
       // Detect mode for UI indicator
       const detectedMode = deepSearchActive ? MODES.DEEP_SEARCH :
@@ -2587,6 +2585,11 @@ ${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
       setIsLoading(false);
       isSendingRef.current = false;
       abortControllerRef.current = null; // Clean up abort controller
+
+      // Clear special modes after completion
+      setIsDeepSearch(false);
+      setIsDocumentConvert(false);
+      setIsWebSearch(false);
     }
   };
 
@@ -4097,16 +4100,27 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                       ) : (
                         msg.content && (
                           <div id={`msg-text-${msg.id}`} className={`max-w-full break-words leading-relaxed whitespace-normal ${msg.role === 'user' ? 'text-slate-900 dark:text-white' : 'text-maintext'}`}>
-                            {msg.role === 'user' && msg.mode === MODES.DEEP_SEARCH && (
-                              <div className="flex items-center gap-1.5 mb-2 px-2 py-1 bg-white/20 rounded-lg w-fit">
-                                <Search size={10} className="text-white" />
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-white">Deep Search</span>
+                            {msg.role === 'user' && (msg.mode === MODES.DEEP_SEARCH || (msg.role === 'user' && msg.content && (msg.content.toLowerCase().includes('search') || msg.mode === 'web_search'))) && (
+                              <div className="flex items-center gap-1.5 mb-2 px-2.5 py-1 bg-white/20 backdrop-blur-md rounded-full w-fit border border-white/10 shadow-sm">
+                                <Search size={10} className="text-white animate-pulse" />
+                                <span className="text-[9px] font-black uppercase tracking-[0.1em] text-white">
+                                  {msg.mode === MODES.DEEP_SEARCH ? 'Deep Intelligence Search' : 'Web Intelligence Search'}
+                                </span>
                               </div>
                             )}
+
                             {msg.role === 'model' && msg.isRealTime && (
-                              <div className="flex items-center gap-2 mb-3 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full w-fit animate-pulse-slow">
-                                <span className="text-lg">🌐</span>
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-blue-500">Real-Time Data</span>
+                              <div className="flex items-center gap-3 mb-4 px-4 py-2 bg-gradient-to-r from-blue-600/10 to-indigo-600/10 border border-blue-500/20 rounded-2xl w-fit shadow-lg shadow-blue-500/5 transition-all hover:scale-[1.02] group/search-badge">
+                                <div className="p-1.5 bg-blue-500 rounded-lg shadow-md ring-1 ring-blue-400 group-hover/search-badge:rotate-12 transition-transform">
+                                  <Globe className="w-3.5 h-3.5 text-white animate-[spin_8s_linear_infinite]" />
+                                </div>
+                                <div className="flex flex-col">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.15em] text-blue-500 leading-none">AISA Search</span>
+                                    <div className="w-1 h-1 rounded-full bg-blue-400 animate-pulse" />
+                                  </div>
+                                  <span className="text-[9px] font-bold text-blue-500/60 uppercase tracking-widest mt-0.5">Real-Time Grounding Active</span>
+                                </div>
                               </div>
                             )}
 
