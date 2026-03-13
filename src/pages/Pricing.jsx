@@ -311,6 +311,7 @@ const Pricing = () => {
           const displayPrice = billingCycle === 'yearly' ? (plan.priceYearlyPerMonth || plan.priceMonthly) : plan.priceMonthly;
           const displayCredits = billingCycle === 'yearly' ? (plan.creditsYearly || plan.credits) : plan.credits;
           const totalYearlyAmount = plan.priceYearly || 0;
+          const displayValidity = billingCycle === 'yearly' ? (plan.validityYearly || 12) + ' Months' : (plan.validityMonthly || 1) + ' Month';
 
           return (
             <div key={plan._id} className={`pricing-card ${plan.isPopular ? 'popular' : ''} ${isFree ? 'free-tier-card' : ''}`}>
@@ -327,15 +328,30 @@ const Pricing = () => {
 
               <div className="plan-price">
                 {billingCycle === 'yearly' && !isFree && (
-                  <span style={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '0.5em', marginRight: '6px' }}>
-                    ₹{plan.priceMonthly}
-                  </span>
+                  <div className="original-price-container">
+                    <span className="original-price">₹{plan.priceMonthly}</span>
+                    <span className="discount-tag">30% OFF</span>
+                  </div>
                 )}
-                <span className="currency">₹</span>
-                {displayPrice}
-                <span className="billing-period">
-                  {billingCycle === 'yearly' ? (isFounder ? '/mo (lifetime, billed yearly)' : '/mo (billed yearly)') : (isFounder ? '/mo (lifetime)' : '/mo')}
-                </span>
+                <div className="current-price">
+                  <span className="currency">₹</span>
+                  {displayPrice}
+                  <span className="billing-period">
+                    {billingCycle === 'yearly' ? (isFounder ? '/mo (lifetime)' : '/mo') : (isFounder ? '/mo (lifetime)' : '/mo')}
+                  </span>
+                </div>
+                
+                {!isFree && (
+                  <div className="validity-badge">
+                    <ShieldAlert size={12} /> Valid for {displayValidity}
+                  </div>
+                )}
+                
+                {billingCycle === 'yearly' && !isFree && (
+                  <div className="billed-yearly-label">
+                    Billed ₹{totalYearlyAmount}/year
+                  </div>
+                )}
               </div>
 
               <div className="plan-credits">
