@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, Download, FastForward, Rewind } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, Download, FastForward, Rewind, Loader2 } from 'lucide-react';
 import { apiService } from '../services/apiService';
 
-const CustomVideoPlayer = ({ src }) => {
+const CustomVideoPlayer = ({ src, compact = false }) => {
     const videoRef = useRef(null);
     const containerRef = useRef(null);
 
@@ -14,6 +14,7 @@ const CustomVideoPlayer = ({ src }) => {
     const [showControls, setShowControls] = useState(true);
     const [skipAnim, setSkipAnim] = useState(null);
     const [aspectRatio, setAspectRatio] = useState('aspect-video');
+    const [isLoading, setIsLoading] = useState(true);
 
     const fadeTimeoutRef = useRef(null);
     const lastTapTimeRef = useRef(0);
@@ -241,16 +242,25 @@ const CustomVideoPlayer = ({ src }) => {
             <video
                 ref={videoRef}
                 src={src}
-                className="w-full h-full object-cover sm:object-contain cursor-pointer"
+                className="w-full h-full object-contain cursor-pointer"
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
                 onClick={handleVideoClick}
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
                 onEnded={() => setIsPlaying(false)}
+                onWaiting={() => setIsLoading(true)}
+                onCanPlay={() => setIsLoading(false)}
+                onLoadedData={() => setIsLoading(false)}
                 controlsList="nodownload"
                 playsInline
             />
+
+            {isLoading && (
+                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#2A2B32]/80 backdrop-blur-md">
+                    <Loader2 className="w-12 h-12 sm:w-16 sm:h-16 text-primary animate-spin shadow-2xl drop-shadow-[0_0_15px_rgba(var(--primary),0.8)]" />
+                </div>
+            )}
 
             {/* Skip Animation Indicators */}
             {skipAnim === 'left' && (
@@ -275,57 +285,64 @@ const CustomVideoPlayer = ({ src }) => {
             <img
                 src="/logo/Logo.svg"
                 alt="AISA Watermark"
-                className={`absolute right-4 sm:right-6 md:right-8 transition-all duration-300 pointer-events-none z-10 opacity-70 select-none mix-blend-screen ${showControls || !isPlaying ? 'bottom-14 sm:bottom-20 md:bottom-20' : 'bottom-2 sm:bottom-4 md:bottom-6'} w-8 sm:w-12 md:w-14 drop-shadow-2xl`}
+                className={`absolute transition-all duration-300 pointer-events-none z-[15] opacity-60 select-none drop-shadow-2xl ${compact
+                    ? `right-2 w-6 ${showControls || !isPlaying ? 'bottom-12' : 'bottom-2'}`
+                    : `right-4 sm:right-6 md:right-8 w-8 sm:w-10 md:w-12 ${showControls || !isPlaying ? 'bottom-16 sm:bottom-20 md:bottom-24' : 'bottom-2 sm:bottom-4 md:bottom-6'}`
+                    }`}
             />
 
             {/* Floating Controls Bar */}
             <div
-                className={`absolute bottom-3 sm:bottom-4 md:bottom-5 left-3 right-3 sm:left-4 sm:right-4 md:left-6 md:right-6 transition-all duration-300 transform ${showControls || !isPlaying ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0 pointer-events-none'}`}
+                className={`absolute transition-all duration-300 transform ${compact ? 'bottom-2 left-2 right-2' : 'bottom-3 sm:bottom-4 md:bottom-5 left-3 right-3 sm:left-4 sm:right-4 md:left-6 md:right-6'} ${showControls || !isPlaying ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0 pointer-events-none'}`}
             >
-                <div className="bg-[#2A2B32]/90 backdrop-blur-xl border border-white/10 rounded-lg sm:rounded-xl px-2 py-2 sm:px-4 sm:py-3 flex items-center gap-2 sm:gap-4 md:gap-5 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+                <div className={`bg-[#2A2B32]/90 backdrop-blur-xl border border-white/10 ${compact ? 'rounded-lg px-2 py-2 flex items-center gap-2' : 'rounded-lg sm:rounded-xl px-2 py-2 sm:px-4 sm:py-3 flex items-center gap-2 sm:gap-4 md:gap-5'} shadow-[0_8px_32px_rgba(0,0,0,0.5)]`}>
 
                     {/* Download Button */}
                     <button
                         onClick={handleDownload}
                         disabled={isDownloading}
-                        className={`flex items-center gap-1 sm:gap-1.5 bg-primary hover:bg-primary/90 transition-all px-2 py-1 sm:px-3 sm:py-1.5 rounded text-white font-bold text-[8px] sm:text-[10px] tracking-wide shrink-0 ${isDownloading ? 'opacity-70 scale-95 cursor-wait animate-pulse' : 'active:scale-95'}`}
+                        className={`flex items-center bg-primary hover:bg-primary/90 transition-all rounded text-white font-bold tracking-wide shrink-0 ${compact ? 'gap-1 px-1.5 py-1 text-[9px]' : 'gap-1 sm:gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 text-[8px] sm:text-[10px]'} ${isDownloading ? 'opacity-70 scale-95 cursor-wait animate-pulse' : 'active:scale-95'}`}
                         title={isDownloading ? "Downloading..." : "Download Video"}
                     >
                         {isDownloading ? (
-                            <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <div className={`border-2 border-white/30 border-t-white rounded-full animate-spin ${compact ? 'w-3 h-3' : 'w-3 h-3 sm:w-3.5 sm:h-3.5'}`} />
                         ) : (
-                            <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                            <Download className={compact ? 'w-3 h-3' : 'w-3 h-3 sm:w-3.5 sm:h-3.5'} />
                         )}
-                        <span>{isDownloading ? 'DOWNLOADING...' : 'DOWNLOAD'}</span>
+                        {!compact && <span>{isDownloading ? 'DOWNLOADING...' : 'DOWNLOAD'}</span>}
                     </button>
 
                     {/* Skip Backward */}
-                    <button
-                        onClick={skipBackward}
-                        className="text-white hover:text-[#8C52FF] transition-colors shrink-0 hidden sm:flex items-center gap-0.5"
-                        title="Skip backward 2s"
-                    >
-                        <Rewind className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
-                        <span className="text-[8px] sm:text-[10px] font-bold font-mono">-2s</span>
-                    </button>
+                    {!compact && (
+                        <button
+                            onClick={skipBackward}
+                            className="text-white hover:text-[#8C52FF] transition-colors shrink-0 hidden sm:flex items-center gap-0.5"
+                            title="Skip backward 2s"
+                        >
+                            <Rewind className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
+                            <span className="text-[8px] sm:text-[10px] font-bold font-mono">-2s</span>
+                        </button>
+                    )}
 
                     {/* Play / Pause */}
                     <button
                         onClick={togglePlay}
-                        className="text-white hover:text-[#8C52FF] transition-colors shrink-0 hidden sm:block"
+                        className={`text-white hover:text-[#8C52FF] transition-colors shrink-0 ${compact ? 'block' : 'hidden sm:block'}`}
                     >
-                        {isPlaying ? <Pause className="w-4 h-4 sm:w-5 sm:h-5 fill-current" /> : <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current border-2 border-transparent" />}
+                        {isPlaying ? <Pause className={compact ? 'w-4 h-4 fill-current' : 'w-4 h-4 sm:w-5 sm:h-5 fill-current'} /> : <Play className={compact ? 'w-4 h-4 fill-current' : 'w-4 h-4 sm:w-5 sm:h-5 fill-current'} />}
                     </button>
 
                     {/* Skip Forward */}
-                    <button
-                        onClick={skipForward}
-                        className="text-white hover:text-[#8C52FF] transition-colors shrink-0 hidden sm:flex items-center gap-0.5"
-                        title="Skip forward 2s"
-                    >
-                        <FastForward className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
-                        <span className="text-[8px] sm:text-[10px] font-bold font-mono">+2s</span>
-                    </button>
+                    {!compact && (
+                        <button
+                            onClick={skipForward}
+                            className="text-white hover:text-[#8C52FF] transition-colors shrink-0 hidden sm:flex items-center gap-0.5"
+                            title="Skip forward 2s"
+                        >
+                            <FastForward className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
+                            <span className="text-[8px] sm:text-[10px] font-bold font-mono">+2s</span>
+                        </button>
+                    )}
 
                     {/* Progress Bar Container */}
                     <div className="flex-1 flex items-center group/progress relative h-6 cursor-pointer">
@@ -337,25 +354,27 @@ const CustomVideoPlayer = ({ src }) => {
                             onChange={handleSeek}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                         />
-                        <div className="w-full h-1.5 bg-white/20 rounded-full relative overflow-hidden">
+                        <div className="w-full h-1 bg-white/20 rounded-full relative overflow-hidden">
                             <div
                                 className="absolute top-0 left-0 bottom-0 bg-white group-hover/progress:bg-[#8C52FF] transition-colors rounded-full"
-                                style={{ width: `${(currentTime / (duration || 1)) * 100}%` }}
+                                style={{ width: `${(duration > 0 ? currentTime / duration : 0) * 100}%` }}
                             ></div>
                         </div>
                     </div>
 
                     {/* Time Display */}
-                    <div className="text-white/80 text-[10px] sm:text-sm font-medium tracking-wide shrink-0 tabular-nums">
-                        {formatTime(currentTime)} / {formatTime(duration)}
-                    </div>
+                    {!compact && (
+                        <div className="text-white/80 text-[10px] sm:text-sm font-medium tracking-wide shrink-0 tabular-nums">
+                            {formatTime(currentTime)} / {formatTime(duration)}
+                        </div>
+                    )}
 
                     {/* Volume control */}
                     <button
                         onClick={toggleMute}
-                        className="text-white/80 hover:text-white transition-colors shrink-0 hidden sm:block"
+                        className={`text-white/80 hover:text-white transition-colors shrink-0 ${compact ? 'block' : 'hidden sm:block'}`}
                     >
-                        {isMuted ? <VolumeX className="w-4 h-4 sm:w-5 sm:h-5" /> : <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />}
+                        {isMuted ? <VolumeX className={compact ? 'w-3.5 h-3.5' : 'w-4 h-4 sm:w-5 sm:h-5'} /> : <Volume2 className={compact ? 'w-3.5 h-3.5' : 'w-4 h-4 sm:w-5 sm:h-5'} />}
                     </button>
 
 
@@ -364,7 +383,7 @@ const CustomVideoPlayer = ({ src }) => {
                         onClick={toggleFullscreen}
                         className="text-white/80 hover:text-white transition-colors shrink-0"
                     >
-                        {isFullscreen ? <Minimize className="w-4 h-4 sm:w-5 sm:h-5" /> : <Maximize className="w-4 h-4 sm:w-5 sm:h-5" />}
+                        {isFullscreen ? <Minimize className={compact ? 'w-3.5 h-3.5' : 'w-4 h-4 sm:w-5 sm:h-5'} /> : <Maximize className={compact ? 'w-3.5 h-3.5' : 'w-4 h-4 sm:w-5 sm:h-5'} />}
                     </button>
 
                 </div>

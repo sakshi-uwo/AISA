@@ -28,6 +28,7 @@ import { getUserData, sessionsData, toggleState, memoryData } from '../userStore
 import { usePersonalization } from '../context/PersonalizationContext';
 import OnboardingModal from '../Components/OnboardingModal';
 import PremiumUpsellModal from '../Components/PremiumUpsellModal';
+import MagicVideoGenModal from '../Components/MagicVideoGenModal';
 import { getSubscriptionDetails } from '../services/pricingService';
 
 
@@ -286,6 +287,7 @@ const Chat = () => {
   const [waUploading, setWaUploading] = useState(false);
   const [waMsgContent, setWaMsgContent] = useState('');
   const [isMagicEditing, setIsMagicEditing] = useState(false);
+  const [isMagicVideoModalOpen, setIsMagicVideoModalOpen] = useState(false);
   const [isLiveMode, setIsLiveMode] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLimitReached, setIsLimitReached] = useState(false);
@@ -1947,20 +1949,28 @@ const Chat = () => {
     if ((!contentToSend && filePreviews.length === 0) || isLoading) return;
 
     // --- Proactive Magic Tool Activation Check ---
-    const lowerContent = contentToSend.toLowerCase();
+    const lowerContent = contentToSend.toLowerCase().trim();
     const magicTools = [
       {
         id: 'image',
         name: 'Generate Image',
         active: isImageGeneration,
-        check: () => (lowerContent.includes('image') || lowerContent.includes('photo') || lowerContent.includes('pic') || lowerContent.includes('draw')) &&
-          (lowerContent.includes('generate') || lowerContent.includes('create') || lowerContent.includes('make') || lowerContent.includes('show'))
+        check: () => {
+          const startsWithImage = lowerContent.startsWith('image') || lowerContent.startsWith('picture') || lowerContent.startsWith('photo') || lowerContent.startsWith('drawing') || lowerContent.startsWith('imagine') || lowerContent.startsWith('paint') || lowerContent.startsWith('generate');
+          const hasImageAction = (lowerContent.includes('image') || lowerContent.includes('photo') || lowerContent.includes('pic') || lowerContent.includes('portrait') || lowerContent.includes('sketch') || lowerContent.includes('wallpaper')) && 
+                                (lowerContent.includes('generate') || lowerContent.includes('create') || lowerContent.includes('make') || lowerContent.includes('show') || lowerContent.includes('draw'));
+          return (startsWithImage && lowerContent.length > 15) || hasImageAction;
+        }
       },
       {
         id: 'video',
         name: 'Generate Video',
         active: isVideoGeneration,
-        check: () => lowerContent.includes('video') && (lowerContent.includes('generate') || lowerContent.includes('create') || lowerContent.includes('make'))
+        check: () => {
+          const startsWithVideo = lowerContent.startsWith('video') || lowerContent.startsWith('animate') || lowerContent.startsWith('movie');
+          const hasVideoAction = lowerContent.includes('video') && (lowerContent.includes('generate') || lowerContent.includes('create') || lowerContent.includes('make') || lowerContent.includes('animate'));
+          return (startsWithVideo && lowerContent.length > 10) || hasVideoAction;
+        }
       },
       {
         id: 'deepsearch',
@@ -1972,35 +1982,48 @@ const Chat = () => {
         id: 'websearch',
         name: 'Real-Time Web Search',
         active: isWebSearch || isDeepSearch,
-        check: () => lowerContent.includes('search the web') || lowerContent.includes('live data') || lowerContent.includes('current news') || lowerContent.includes('aaj ki') || lowerContent.includes('latest')
+        check: () => lowerContent.includes('search the web') || lowerContent.includes('live data') || lowerContent.includes('current news') || lowerContent.includes('aaj ki') || lowerContent.includes('latest') || lowerContent.includes('stock price') || lowerContent.includes('weather')
       },
       {
         id: 'audio',
         name: 'Convert to Audio',
         active: isAudioConvertMode,
-        check: () => lowerContent.includes('convert to audio') || (lowerContent.includes('read this') && lowerContent.length < 50)
+        check: () => lowerContent.includes('convert to audio') || lowerContent.includes('text to speech') || lowerContent.includes('make a voice') || (lowerContent.includes('read this') && lowerContent.length < 50)
       },
       {
         id: 'document',
         name: 'Convert Documents',
         active: isDocumentConvert,
-        check: () => lowerContent.includes('convert document') || lowerContent.includes('pdf to word') || lowerContent.includes('word to pdf')
+        check: () => lowerContent.includes('convert document') || lowerContent.includes('pdf to') || lowerContent.includes('word to') || lowerContent.includes('extract text')
       },
       {
         id: 'code',
         name: 'Code Writer',
         active: isCodeWriter,
-        check: () => lowerContent.includes('write code') || lowerContent.includes('fix code') || lowerContent.includes('debug code')
+        check: () => {
+          const codingKeywords = ['code', 'programming', 'python', 'javascript', 'html', 'css', 'react', 'function', 'script', 'algorithm', 'debug', 'develop', 'java', 'c++', 'php', 'sql'];
+          const hasCodingKeyword = codingKeywords.some(kw => lowerContent.includes(kw));
+          const hasActionKeyword = ['write', 'generate', 'create', 'give', 'show', 'debug', 'fix', 'make', 'build'].some(kw => lowerContent.includes(kw));
+          return hasCodingKeyword && hasActionKeyword;
+        }
+      },
+      {
+        id: 'edit_image',
+        name: 'Edit Image',
+        active: isMagicEditing,
+        check: () => (lowerContent.includes('edit') || lowerContent.includes('modify') || lowerContent.includes('change') || lowerContent.includes('remove')) && 
+                     (lowerContent.includes('image') || lowerContent.includes('photo') || lowerContent.includes('pic') || lowerContent.includes('background') || lowerContent.includes('bg'))
       }
     ];
 
     for (const tool of magicTools) {
       if (!tool.active && tool.check()) {
         toast.error(`Please activate "${tool.name}" from Magic Tools. (Is feature ko active karo)`, {
-          duration: 4000,
+          duration: 5000,
           position: 'top-center'
         });
         setIsToolsMenuOpen(true);
+        isSendingRef.current = false; // Reset sending state
         return;
       }
     }
@@ -4272,8 +4295,8 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
 
                             {/* Dynamic Video Rendering */}
                             {msg.videoUrl && (
-                              <div className="relative mt-4 mb-2">
-                                <CustomVideoPlayer src={msg.videoUrl} />
+                              <div className="relative mt-4 mb-2 w-full max-w-xl">
+                                <CustomVideoPlayer src={msg.videoUrl} compact={true} />
                               </div>
                             )}
 
@@ -4971,8 +4994,10 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                             <ImageIcon className="w-4.5 h-4.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-[14px] font-bold text-maintext block leading-tight">Generate Image</span>
-                            <span className="text-[10px] text-subtext block leading-tight truncate mt-0.5">Create beautiful visuals from text</span>
+                            <span className="text-[14px] font-bold text-maintext flex items-center gap-2 leading-tight">
+                              <span className="aisa-badge-small">AISA</span>
+                              Generate Image
+                            </span>
                           </div>
                         </button>
 
@@ -4995,8 +5020,10 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                             <Video className="w-4.5 h-4.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-[14px] font-bold text-maintext block leading-tight">Generate Video</span>
-                            <span className="text-[10px] text-subtext block leading-tight truncate mt-0.5">Create AI videos from text</span>
+                            <span className="text-[14px] font-bold text-maintext flex items-center gap-2 leading-tight">
+                              <span className="aisa-badge-small">AISA</span>
+                              Generate Video
+                            </span>
                           </div>
                         </button>
 
@@ -5020,8 +5047,10 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                             <Globe className="w-4.5 h-4.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-[14px] font-bold text-maintext block leading-tight">Web Search</span>
-                            <span className="text-[10px] text-subtext block leading-tight truncate mt-0.5">Live information from the web</span>
+                            <span className="text-[14px] font-bold text-maintext flex items-center gap-2 leading-tight">
+                              <span className="aisa-badge-small">AISA</span>
+                              Web Search
+                            </span>
                           </div>
                         </button>
 
@@ -5045,8 +5074,10 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                             <Search className="w-4.5 h-4.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-[14px] font-bold text-maintext block leading-tight">Deep Search</span>
-                            <span className="text-[10px] text-subtext block leading-tight truncate mt-0.5">Advanced web research & analysis</span>
+                            <span className="text-[14px] font-bold text-maintext flex items-center gap-2 leading-tight">
+                              <span className="aisa-badge-small">AISA</span>
+                              Deep Search
+                            </span>
                           </div>
                         </button>
 
@@ -5069,8 +5100,10 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                             <Headphones className="w-4.5 h-4.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-[14px] font-bold text-maintext block leading-tight">Convert to Audio</span>
-                            <span className="text-[10px] text-subtext block leading-tight truncate mt-0.5">Turn documents into speech</span>
+                            <span className="text-[14px] font-bold text-maintext flex items-center gap-2 leading-tight">
+                              <span className="aisa-badge-small">AISA</span>
+                              Convert to Audio
+                            </span>
                           </div>
                         </button>
 
@@ -5093,8 +5126,10 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                             <FileText className="w-4.5 h-4.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-[14px] font-bold text-maintext block leading-tight">Convert Documents</span>
-                            <span className="text-[10px] text-subtext block leading-tight truncate mt-0.5">PDF ↔ Word conversion</span>
+                            <span className="text-[14px] font-bold text-maintext flex items-center gap-2 leading-tight">
+                              <span className="aisa-badge-small">AISA</span>
+                              Convert Documents
+                            </span>
                           </div>
                         </button>
 
@@ -5119,8 +5154,10 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                             <Code className="w-4.5 h-4.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-[14px] font-bold text-maintext block leading-tight">Code Writer</span>
-                            <span className="text-[10px] text-subtext block leading-tight truncate mt-0.5">Write & debug code with AISA</span>
+                            <span className="text-[14px] font-bold text-maintext flex items-center gap-2 leading-tight">
+                              <span className="aisa-badge-small">AISA</span>
+                              Code Writer
+                            </span>
                           </div>
                         </button>
 
@@ -5144,10 +5181,33 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                             <Wand2 className="w-4.5 h-4.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-[14px] font-bold text-maintext block leading-tight">Edit Image</span>
-                            <span className="text-[10px] text-subtext block leading-tight truncate mt-0.5">Edit image via Vertex AI</span>
+                            <span className="text-[14px] font-bold text-maintext flex items-center gap-2 leading-tight">
+                              <span className="aisa-badge-small">AISA</span>
+                              Edit Image
+                            </span>
                           </div>
                         </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!checkPremiumTool('Image to Video')) return;
+                            setIsToolsMenuOpen(false);
+                            setIsMagicVideoModalOpen(true);
+                          }}
+                          className={`w-full text-left px-3 py-2 flex items-center gap-3 rounded-2xl transition-all group cursor-pointer hover:bg-primary/5`}
+                        >
+                          <div className={`w-10 h-10 rounded-full border flex items-center justify-center transition-colors shrink-0 bg-surface border-border group-hover:border-primary/30 group-hover:bg-primary/10`}>
+                            <Wand2 className="w-4.5 h-4.5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className="text-[14px] font-bold text-maintext flex items-center gap-2 leading-tight">
+                              <span className="aisa-badge-small">AISA</span>
+                              Image {'->'} Video Magic Card
+                            </span>
+                          </div>
+                        </button>
+
                       </div>
                     </motion.div>
                   )}
@@ -5624,6 +5684,11 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
         )
       }
       <PremiumUpsellModal />
+      <MagicVideoGenModal
+        isOpen={isMagicVideoModalOpen}
+        onClose={() => setIsMagicVideoModalOpen(false)}
+        onCreditDeduction={(credits) => console.log('deducted', credits)}
+      />
     </div >
   );
 };

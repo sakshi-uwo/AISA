@@ -1,4 +1,10 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { PRIVACY_POLICY_DEFAULTS } from '../constants/legalDefaults';
+import { Database, Lock, Shield, Eye, UserCheck, FileText, ArrowLeft } from 'lucide-react';
+import { apiService } from '../services/apiService';
+import { name } from '../constants';
 
 const PrivacyPolicy = () => {
     const navigate = useNavigate();
@@ -29,19 +35,11 @@ const PrivacyPolicy = () => {
                         }));
                     }
                 } else {
-                    const mappedDefaults = PRIVACY_POLICY_DEFAULTS.map((s, i) => ({
-                        ...s,
-                        icon: getDynamicIcon(i)
-                    }));
-                    setSections(mappedDefaults);
+                    setSections([]);
                 }
             } catch (err) {
                 console.error("Failed to fetch dynamic policy:", err);
-                const mappedDefaults = PRIVACY_POLICY_DEFAULTS.map((s, i) => ({
-                    ...s,
-                    icon: getDynamicIcon(i)
-                }));
-                setSections(mappedDefaults);
+                setSections([]);
             } finally {
                 setLoading(false);
             }
@@ -56,7 +54,7 @@ const PrivacyPolicy = () => {
             <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-border">
                 <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
                     <button
-                        onClick={() => navigate(-1)}
+                        onClick={() => window.history.state && window.history.state.idx > 0 ? navigate(-1) : navigate('/')}
                         className="flex items-center gap-2 text-subtext hover:text-primary transition-colors group"
                     >
                         <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />

@@ -7,6 +7,7 @@ import { API } from '../types';
 
 const KnowledgeUpload = ({ onUploadSuccess }) => {
     const [file, setFile] = useState(null);
+    const [category, setCategory] = useState('General');
     const [isDragActive, setIsDragActive] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -104,6 +105,7 @@ const KnowledgeUpload = ({ onUploadSuccess }) => {
 
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('category', category);
 
         try {
             const data = await apiService.uploadKnowledgeDocument(formData, (percent) => {
@@ -160,7 +162,7 @@ const KnowledgeUpload = ({ onUploadSuccess }) => {
                                     type="file"
                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                     onChange={handleFileChange}
-                                    accept=".pdf,.docx,.xlsx,.pptx,.txt,image/*"
+                                    accept=".pdf,.docx,.xlsx,.pptx,.txt,.csv,image/*"
                                 />
 
                                 <motion.div
@@ -220,6 +222,23 @@ const KnowledgeUpload = ({ onUploadSuccess }) => {
                                                 className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full"
                                             />
                                         </div>
+                                    </div>
+                                )}
+
+                                {!isUploading && (
+                                    <div className="mb-6">
+                                        <label className="block text-sm font-medium text-slate-400 mb-2">Category (Domain)</label>
+                                        <select
+                                            value={category}
+                                            onChange={(e) => setCategory(e.target.value)}
+                                            className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2 text-slate-200 outline-none focus:border-purple-500 transition-colors"
+                                        >
+                                            <option value="General">General</option>
+                                            <option value="HR">HR / Policies</option>
+                                            <option value="Engineering">Engineering</option>
+                                            <option value="Sales">Sales & Marketing</option>
+                                            <option value="Support">Customer Support</option>
+                                        </select>
                                     </div>
                                 )}
 
@@ -312,7 +331,8 @@ const KnowledgeUpload = ({ onUploadSuccess }) => {
                                     </div>
                                     <div className="min-w-0">
                                         <p className="text-sm font-bold text-maintext truncate" title={doc.filename}>{doc.filename}</p>
-                                        <div className="flex items-center gap-2 text-xs text-subtext">
+                                        <div className="flex items-center gap-2 text-xs text-subtext mt-1">
+                                            <span className="bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full text-[10px] font-medium">{doc.category || 'General'}</span>
                                             <span>{new Date(doc.uploadDate).toLocaleDateString()}</span>
                                             {doc.size && <span>• {(doc.size / 1024 / 1024).toFixed(2)} MB</span>}
                                         </div>
