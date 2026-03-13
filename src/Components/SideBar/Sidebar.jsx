@@ -455,18 +455,21 @@ const Sidebar = ({ isOpen, onClose }) => {
 
 
                 <div className="flex-1 min-w-0 text-left flex items-center gap-3">
-                  <div className="w-9 h-9 flex items-center justify-center shrink-0 rounded-full overflow-hidden bg-secondary border border-white/10">
+                  <div className="w-9 h-9 flex items-center justify-center shrink-0 rounded-full overflow-hidden bg-secondary border border-white/10 relative group/avatar">
                     {user.avatar ? (
                       <img
                         src={user.avatar}
                         alt={user.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover/avatar:opacity-40 transition-opacity"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-primary text-white font-bold text-sm uppercase">
+                      <div className="w-full h-full flex items-center justify-center bg-primary text-white font-bold text-sm uppercase group-hover/avatar:opacity-40 transition-opacity">
                         {user.name ? user.name.charAt(0) : "U"}
                       </div>
                     )}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+                      <Edit2 className="w-3.5 h-3.5 text-primary" />
+                    </div>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 overflow-hidden">

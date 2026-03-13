@@ -2,22 +2,19 @@ import { atom } from "recoil"
 
 const getAvatarUrl = (user) => {
   if (!user || !user.email) return "";
-  const encodedName = encodeURIComponent(user.name || "User");
-  const fallbackUrl = `https://ui-avatars.com/api/?name=${encodedName}&background=random&color=fff`;
-
-  // If it's a Gmail address, specifically ask for the Google avatar
-  if (user.email.toLowerCase().includes('@gmail.com')) {
-    return `https://unavatar.io/google/${user.email}?fallback=${encodeURIComponent(fallbackUrl)}`;
+  let baseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
+  // Remove /api if it exists to avoid duplication in the template string below
+  if (baseUrl.endsWith('/api')) {
+    baseUrl = baseUrl.replace('/api', '');
   }
-
-  // Default to generic for others
-  return `https://unavatar.io/${user.email}?fallback=${encodeURIComponent(fallbackUrl)}`;
+  const name = user.name || user.email.split('@')[0];
+  return `${baseUrl}/api/auth/proxy-avatar?email=${encodeURIComponent(user.email)}&name=${encodeURIComponent(name)}`;
 };
 
 const processUser = (user) => {
   if (user) {
-    // Always attempt to set a better avatar if one isn't explicitly set, is the default, or is a relative path
-    if (!user.avatar || user.avatar.includes('gravatar.com') || user.avatar === '/User.jpeg' || user.avatar.startsWith('/')) {
+    // Fallback if no avatar exists or it's the default placeholder
+    if (!user.avatar || user.avatar === '/User.jpeg' || user.avatar === '') {
       return { ...user, avatar: getAvatarUrl(user) };
     }
   }

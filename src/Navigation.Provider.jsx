@@ -7,7 +7,6 @@ import Signup from './pages/Signup';
 import VerificationForm from './pages/VerificationForm';
 import Chat from './pages/Chat';
 import Sidebar from './Components/SideBar/Sidebar.jsx';
-import Profile from './pages/Profile';
 import AiPersonalAssistantDashboard from './pages/AiPersonalAssistant/Dashboard';
 import Pricing from './pages/Pricing';
 import CreditUpsellPopup from './Components/CreditUpsellPopup';
@@ -153,8 +152,7 @@ const DashboardLayout = () => {
             </div>
 
             <div
-              onClick={() => navigate(user.email ? '/dashboard/profile' : '/login')}
-              className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm uppercase cursor-pointer hover:bg-primary/30 transition-colors"
+              className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm uppercase cursor-default shadow-sm"
             >
               {user.name?.charAt(0) || 'U'}
             </div>
@@ -222,7 +220,6 @@ const NavigateProvider = () => {
           <Route path="chat/:sessionId?" element={<Chat />} />
           <Route path="ai-personal-assistant" element={<ProtectedRoute><AiPersonalAssistantDashboard /></ProtectedRoute>} />
 
-          <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="admin" element={
             <Suspense fallback={<div className="flex items-center justify-center h-full">Loading...</div>}>
               <AdminDashboard />

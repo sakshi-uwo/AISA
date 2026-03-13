@@ -141,20 +141,38 @@ const Signup = () => {
               <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.3em]">{t('joinAISA')}</p>
             </div>
 
-            <AnimatePresence mode="wait">
-              {(error || passwordError) && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mb-8 p-3 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 justify-center backdrop-blur-md"
-                >
-                  <AlertCircle className="w-3.5 h-3.5" />
-                  {error || passwordError}
-                </motion.div>
-              )}
-            </AnimatePresence>
+          <AnimatePresence mode="wait">
+            {(error || passwordError) && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-8 p-3 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 justify-center backdrop-blur-md"
+              >
+                <AlertCircle className="w-3.5 h-3.5" />
+                {error || passwordError}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Real-time Avatar Preview */}
+          <div className="flex justify-center mb-10">
+            <div className="relative group/avatar">
+              <div className="absolute inset-0 bg-primary/20 blur-[60px] rounded-full group-hover/avatar:bg-primary/30 transition-all opacity-50" />
+              <div className="w-24 h-24 rounded-[2.5rem] bg-white dark:bg-slate-800 border-2 border-white dark:border-slate-800 shadow-2xl overflow-hidden flex items-center justify-center relative translate-y-[-10px] ring-4 ring-white/10">
+                {(() => {
+                  const baseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
+                  const normalized = email.trim().toLowerCase();
+                  const previewUrl = normalized.includes('@') && normalized.length > 5
+                    ? `${baseUrl}/api/auth/proxy-avatar?email=${encodeURIComponent(normalized)}&name=${encodeURIComponent(name || "U")}`
+                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "A")}&background=random&color=fff`;
+                  
+                  return <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />;
+                })()}
+              </div>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
               {/* Name Field - Glassy Style */}
               <div className="relative group">
                 <div className="absolute inset-0 bg-white/30 dark:bg-slate-900/40 rounded-2xl blur-sm transition-all group-focus-within:bg-white/50 dark:group-focus-within:bg-slate-900/60" />
@@ -278,6 +296,15 @@ const Signup = () => {
                 </>
               )}
             </motion.button>
+            
+            <button 
+              type="button"
+              onClick={() => navigate('/login')} // Redirect to login for other social options for simplicity
+              className="w-full flex items-center justify-center gap-2 py-2 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest hover:text-primary transition-colors group mt-2"
+            >
+              <span>More Options (Microsoft, FB, GitHub)</span>
+              <ArrowLeft className="w-3 h-3 rotate-180" />
+            </button>
 
             <div className="mt-10 pt-8 border-t border-white/10 dark:border-slate-800/50 text-center text-xs font-bold text-slate-400 tracking-wide uppercase relative">
               {t('alreadyHaveAccount')}? <Link to="/login" className="text-primary hover:underline ml-1 uppercase tracking-widest font-black">{t('logIn')}</Link>

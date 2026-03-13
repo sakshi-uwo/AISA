@@ -84,6 +84,8 @@ const apis = {
   logIn: `${API}/auth/login`,
   signUp: `${API}/auth/signup`,
   googleLogin: `${API}/auth/google`,
+  microsoftLogin: `${API}/auth/microsoft`,
+  syncProfile: `${API}/auth/sync-profile`,
   socialLogin: `${API}/auth/social-login`,
   forgotPassword: `${API}/auth/forgot-password`,
   emailVerificationApi: `${API}/auth/verify-email`,

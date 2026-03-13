@@ -38,6 +38,7 @@ const Login = () => {
     const userName = params.get('userName');
     const userEmail = params.get('userEmail');
     const provider = params.get('provider');
+    const picture = params.get('picture');
 
     if (isSocialAuth && token && userId) {
       toast.success(`Successfully authenticated as ${userName}!`);
@@ -49,7 +50,8 @@ const Login = () => {
         token: token,
         role: "user",
         plan: "Basic",
-        provider: provider || "local"
+        provider: provider || "local",
+        avatar: picture || ""
       };
 
       // Real state update & storage
@@ -149,7 +151,9 @@ const Login = () => {
 
     // Construct the backend auth URL safely
     // Redirecting to backend which then handles provider-specific handshake
-    const backendAuthUrl = apis.logIn.replace('/login', `/${provider.toLowerCase()}`);
+    const backendAuthUrl = provider.toLowerCase() === 'microsoft' 
+      ? apis.microsoftLogin 
+      : apis.logIn.replace('/login', `/${provider.toLowerCase()}`);
 
     toast.loading(`Opening ${provider} Login...`);
 
@@ -201,6 +205,24 @@ const Login = () => {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Real-time Avatar Preview */}
+          <div className="flex justify-center mb-6">
+            <div className="relative group/avatar">
+              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full group-hover/avatar:bg-primary/30 transition-all opacity-50" />
+              <div className="w-20 h-20 rounded-3xl bg-white dark:bg-slate-800 border-2 border-white dark:border-slate-800 shadow-xl overflow-hidden flex items-center justify-center relative translate-y-[-10px]">
+                {(() => {
+                  const baseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
+                  const normalized = email.trim().toLowerCase();
+                  const previewUrl = normalized.includes('@') && normalized.length > 5
+                    ? `${baseUrl}/api/auth/proxy-avatar?email=${encodeURIComponent(normalized)}&name=U`
+                    : `https://ui-avatars.com/api/?name=A&background=random&color=fff`;
+                  
+                  return <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />;
+                })()}
+              </div>
+            </div>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="relative group">
