@@ -181,20 +181,12 @@ const Pricing = () => {
         business: <span className="feature-badge">✓ Priority</span>,
       },
       {
-        feature: 'AISA Image HD',
+        feature: 'AISA Generate Image',
         free: <span className="flex items-center justify-center"><X size={20} className="cross-icon" /></span>,
         starter: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
-        founder: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
-        pro: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
-        business: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
-      },
-      {
-        feature: 'AISA Image Ultra',
-        free: <span className="flex items-center justify-center"><X size={20} className="cross-icon" /></span>,
-        starter: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
-        founder: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
-        pro: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
-        business: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
+        founder: <span className="feature-badge">✓ Ultra HD</span>,
+        pro: <span className="feature-badge">✓ Ultra HD</span>,
+        business: <span className="feature-badge">✓ Ultra HD</span>,
       },
       {
         feature: 'AISA Edit Image',
@@ -205,20 +197,28 @@ const Pricing = () => {
         business: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
       },
       {
-        feature: 'AISA Video Fast',
+        feature: 'AISA Generate Video',
         free: <span className="flex items-center justify-center"><X size={20} className="cross-icon" /></span>,
         starter: <span className="feature-badge">✓ 1080p</span>,
-        founder: <span className="feature-badge">✓ 4K</span>,
-        pro: <span className="feature-badge">✓ 4K</span>,
-        business: <span className="feature-badge">✓ 4K</span>,
+        founder: <span className="feature-badge">✓ 4K Ultra</span>,
+        pro: <span className="feature-badge">✓ 4K Ultra</span>,
+        business: <span className="feature-badge">✓ 4K Ultra</span>,
       },
       {
-        feature: 'AISA Video Pro',
+        feature: 'AISA Image -> Video Magic Card',
         free: <span className="flex items-center justify-center"><X size={20} className="cross-icon" /></span>,
         starter: <span className="flex items-center justify-center"><X size={20} className="cross-icon" /></span>,
-        founder: <span className="feature-badge">✓ 1080p & 4K</span>,
-        pro: <span className="feature-badge">✓ 1080p & 4K</span>,
-        business: <span className="feature-badge">✓ 1080p & 4K</span>,
+        founder: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
+        pro: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
+        business: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
+      },
+      {
+        feature: 'AISA Web Search',
+        free: <span className="flex items-center justify-center"><X size={20} className="cross-icon" /></span>,
+        starter: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
+        founder: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
+        pro: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
+        business: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
       },
       {
         feature: 'AISA Deep Search',
@@ -229,7 +229,23 @@ const Pricing = () => {
         business: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
       },
       {
-        feature: 'AISA Doc Analysis',
+        feature: 'AISA Code Writer',
+        free: <span className="flex items-center justify-center"><X size={20} className="cross-icon" /></span>,
+        starter: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
+        founder: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
+        pro: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
+        business: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
+      },
+      {
+        feature: 'AISA Convert to Audio',
+        free: <span className="flex items-center justify-center"><X size={20} className="cross-icon" /></span>,
+        starter: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
+        founder: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
+        pro: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
+        business: <span className="flex items-center justify-center"><Check size={20} className="check-icon" /></span>,
+      },
+      {
+        feature: 'AISA Convert Documents',
         free: <span className="flex items-center justify-center"><X size={20} className="cross-icon" /></span>,
         starter: <span className="feature-badge">Advanced</span>,
         founder: <span className="feature-badge">Advanced</span>,
@@ -264,7 +280,10 @@ const Pricing = () => {
             <tbody>
               {comparisonData.map((row, idx) => (
                 <tr key={idx}>
-                  <td className="font-bold">{row.feature}</td>
+                  <td className="font-bold flex items-center gap-2">
+                    <span className="aisa-badge-small">AISA</span>
+                    {row.feature.replace('AISA ', '')}
+                  </td>
                   {plans.map(plan => (
                     <td key={`${plan._id}-${row.feature}`}>
                       {row[getPlanKey(plan.planName)]}
@@ -372,7 +391,10 @@ const Pricing = () => {
                 {plan.features.map((feature, i) => (
                   <li key={i}>
                     <Check size={16} />
-                    {feature}
+                    <span className="flex items-center gap-1.5">
+                      <span className="aisa-badge-small" style={{ fontSize: '0.6rem', padding: '1px 4px', minWidth: '30px' }}>AISA</span>
+                      {feature.replace(/^AISA\s+/i, '')}
+                    </span>
                   </li>
                 ))}
               </ul>

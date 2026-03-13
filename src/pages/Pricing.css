@@ -918,3 +918,24 @@
   background: rgba(251, 191, 36, 0.08);
   border-color: rgba(251, 191, 36, 0.2);
 }
+
+.aisa-badge-small {
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 35px;
+}
+
+.dark .aisa-badge-small {
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}

@@ -4973,8 +4973,10 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                             <ImageIcon className="w-4.5 h-4.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-[14px] font-bold text-maintext block leading-tight">Generate Image</span>
-                            <span className="text-[10px] text-subtext block leading-tight truncate mt-0.5">Create beautiful visuals from text</span>
+                            <span className="text-[14px] font-bold text-maintext flex items-center gap-2 leading-tight">
+                              <span className="aisa-badge-small">AISA</span>
+                              Generate Image
+                            </span>
                           </div>
                         </button>
 
@@ -4997,8 +4999,10 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                             <Video className="w-4.5 h-4.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-[14px] font-bold text-maintext block leading-tight">Generate Video</span>
-                            <span className="text-[10px] text-subtext block leading-tight truncate mt-0.5">Create AI videos from text</span>
+                            <span className="text-[14px] font-bold text-maintext flex items-center gap-2 leading-tight">
+                              <span className="aisa-badge-small">AISA</span>
+                              Generate Video
+                            </span>
                           </div>
                         </button>
 
@@ -5022,8 +5026,10 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                             <Globe className="w-4.5 h-4.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-[14px] font-bold text-maintext block leading-tight">Web Search</span>
-                            <span className="text-[10px] text-subtext block leading-tight truncate mt-0.5">Live information from the web</span>
+                            <span className="text-[14px] font-bold text-maintext flex items-center gap-2 leading-tight">
+                              <span className="aisa-badge-small">AISA</span>
+                              Web Search
+                            </span>
                           </div>
                         </button>
 
@@ -5047,8 +5053,10 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                             <Search className="w-4.5 h-4.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-[14px] font-bold text-maintext block leading-tight">Deep Search</span>
-                            <span className="text-[10px] text-subtext block leading-tight truncate mt-0.5">Advanced web research & analysis</span>
+                            <span className="text-[14px] font-bold text-maintext flex items-center gap-2 leading-tight">
+                              <span className="aisa-badge-small">AISA</span>
+                              Deep Search
+                            </span>
                           </div>
                         </button>
 
@@ -5071,8 +5079,10 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                             <Headphones className="w-4.5 h-4.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-[14px] font-bold text-maintext block leading-tight">Convert to Audio</span>
-                            <span className="text-[10px] text-subtext block leading-tight truncate mt-0.5">Turn documents into speech</span>
+                            <span className="text-[14px] font-bold text-maintext flex items-center gap-2 leading-tight">
+                              <span className="aisa-badge-small">AISA</span>
+                              Convert to Audio
+                            </span>
                           </div>
                         </button>
 
@@ -5095,8 +5105,10 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                             <FileText className="w-4.5 h-4.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-[14px] font-bold text-maintext block leading-tight">Convert Documents</span>
-                            <span className="text-[10px] text-subtext block leading-tight truncate mt-0.5">PDF ↔ Word conversion</span>
+                            <span className="text-[14px] font-bold text-maintext flex items-center gap-2 leading-tight">
+                              <span className="aisa-badge-small">AISA</span>
+                              Convert Documents
+                            </span>
                           </div>
                         </button>
 
@@ -5121,8 +5133,10 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                             <Code className="w-4.5 h-4.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-[14px] font-bold text-maintext block leading-tight">Code Writer</span>
-                            <span className="text-[10px] text-subtext block leading-tight truncate mt-0.5">Write & debug code with AISA</span>
+                            <span className="text-[14px] font-bold text-maintext flex items-center gap-2 leading-tight">
+                              <span className="aisa-badge-small">AISA</span>
+                              Code Writer
+                            </span>
                           </div>
                         </button>
 
@@ -5146,8 +5160,10 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                             <Wand2 className="w-4.5 h-4.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-[14px] font-bold text-maintext block leading-tight">Edit Image</span>
-                            <span className="text-[10px] text-subtext block leading-tight truncate mt-0.5">Edit image via Vertex AI</span>
+                            <span className="text-[14px] font-bold text-maintext flex items-center gap-2 leading-tight">
+                              <span className="aisa-badge-small">AISA</span>
+                              Edit Image
+                            </span>
                           </div>
                         </button>
 
@@ -5164,8 +5180,10 @@ If the user asks for an image (e.g., "generate", "create", "draw", "show me a pi
                             <Wand2 className="w-4.5 h-4.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className="text-[14px] font-bold text-maintext block leading-tight">Image {'->'} Video Magic Card</span>
-                            <span className="text-[10px] text-subtext block leading-tight truncate mt-0.5">Animate image via Veo 3.1</span>
+                            <span className="text-[14px] font-bold text-maintext flex items-center gap-2 leading-tight">
+                              <span className="aisa-badge-small">AISA</span>
+                              Image {'->'} Video Magic Card
+                            </span>
                           </div>
                         </button>
 

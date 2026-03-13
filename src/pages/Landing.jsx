@@ -283,7 +283,10 @@ const Landing = () => {
                                 >
                                     <img src={feature.img} alt={feature.title} className="w-full h-full object-contain drop-shadow-md" />
                                 </motion.div>
-                                <h3 className="text-xl font-bold mb-2 text-black dark:text-white group-hover:text-primary transition-colors">{feature.title}</h3>
+                                <h3 className="text-xl font-bold mb-2 text-black dark:text-white group-hover:text-primary transition-colors flex items-center gap-2">
+                                   <span className="aisa-badge-small">AISA</span>
+                                   {feature.title}
+                                 </h3>
                                 <p className="text-black dark:text-white leading-relaxed">
                                     {feature.desc}
                                 </p>
