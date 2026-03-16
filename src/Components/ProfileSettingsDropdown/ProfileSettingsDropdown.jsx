@@ -8,7 +8,7 @@ import {
     X, ChevronDown, Play, Globe,
     LogOut, Monitor, Mic, Check,
     ChevronLeft, ChevronRight, Trash2, ShieldCheck, Mail, Volume2, Plus,
-    Palette, Type, RefreshCcw, Languages, Crown, History, Calendar, CreditCard, Download, Search, Zap
+    Palette, Type, RefreshCcw, Languages, Crown, History, Calendar, CreditCard, Download, Search, Zap, Loader2
 } from 'lucide-react';
 import { jsPDF } from "jspdf";
 import { usePersonalization } from '../../context/PersonalizationContext';
@@ -44,6 +44,12 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
     const [loadingHistory, setLoadingHistory] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
     const [expandedDate, setExpandedDate] = useState(null);
+    const [improveModel, setImproveModel] = useState(true);
+    const [showSharedLinksModal, setShowSharedLinksModal] = useState(false);
+    const [showArchivedChatsModal, setShowArchivedChatsModal] = useState(false);
+    const [showArchiveAllModal, setShowArchiveAllModal] = useState(false);
+    const [showExportModal, setShowExportModal] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
 
     // Reset Password State
     const [showResetModal, setShowResetModal] = useState(false);
@@ -165,6 +171,37 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
         }
     };
 
+    const handleAvatarUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        const loading = toast.loading("Uploading avatar...");
+        try {
+            const res = await axios.post(apis.uploadAvatar, formData, {
+                headers: {
+                    'Authorization': `Bearer ${user.token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            if (res.data.avatar) {
+                const updatedUser = { ...user, avatar: res.data.avatar };
+                setUserRecoil(prev => ({ ...prev, user: updatedUser }));
+                setUserData(updatedUser);
+                toast.dismiss(loading);
+                toast.success("Avatar updated successfully!");
+                e.target.value = '';
+            }
+        } catch (error) {
+            toast.dismiss(loading);
+            toast.error(error.response?.data?.error || "Failed to upload avatar");
+            e.target.value = '';
+        }
+    };
+
     const handleSendOtp = async () => {
         setResetLoading(true);
         try {
@@ -238,6 +275,40 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
 
     const [searchQuery, setSearchQuery] = useState('');
 
+    const handleConfirmExport = async () => {
+        setIsExporting(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.get(apis.dataExport, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (res.data.success) {
+                setShowExportModal(false);
+                toast.success("Successfully exported data. You should receive an email shortly with your data.", {
+                    style: {
+                        background: '#0f9d58',
+                        color: '#fff',
+                        maxWidth: '800px',
+                        padding: '16px'
+                    },
+                    iconTheme: {
+                        primary: '#fff',
+                        secondary: '#0f9d58',
+                    },
+                    duration: 5000,
+                });
+            }
+        } catch (error) {
+            console.error("Export failure:", error);
+            toast.error("Failed to export data. Please try again.");
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     const allSettings = useMemo(() => {
         const settings = [];
 
@@ -257,9 +328,56 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
         });
 
         // Data
+        const renderPillButton = (text, onClick, danger = false) => (
+            <button 
+                onClick={onClick}
+                className={`px-4 py-1.5 rounded-full text-sm font-bold border transition-colors ${
+                    danger 
+                        ? 'border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10' 
+                        : 'border-gray-200 dark:border-white/20 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5'
+                }`}
+            >
+                {text}
+            </button>
+        );
+
         settings.push({
-            id: 'chatHistory', tab: 'data', label: t('chatHistory'), description: t('chatHistoryDesc'), keywords: 'save toggle',
-            component: renderSettingRow(t('chatHistory'), t('chatHistoryDesc'), renderToggle(personalizations.dataControls?.chatHistory === 'On', (val) => updatePersonalization('dataControls', { chatHistory: val ? 'On' : 'Off' })))
+            id: 'improveModel', tab: 'data', label: 'Improve the model for everyone', description: '', keywords: 'model data',
+            component: renderSettingRow('Improve the model for everyone', null, (
+                <button onClick={() => setImproveModel(!improveModel)} className="flex items-center gap-1 text-sm font-bold text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                    {improveModel ? 'On' : 'Off'} <ChevronRight className="w-4 h-4" />
+                </button>
+            ))
+        });
+        
+        settings.push({
+            id: 'sharedLinks', tab: 'data', label: 'Shared links', description: '', keywords: 'shared links',
+            component: renderSettingRow('Shared links', null, renderPillButton('Manage', () => setShowSharedLinksModal(true)))
+        });
+
+        settings.push({
+            id: 'archivedChats', tab: 'data', label: 'Archived chats', description: '', keywords: 'archive manage',
+            component: renderSettingRow('Archived chats', null, renderPillButton('Manage', () => setShowArchivedChatsModal(true)))
+        });
+
+        settings.push({
+            id: 'archiveAll', tab: 'data', label: 'Archive all chats', description: '', keywords: 'archive all',
+            component: renderSettingRow('Archive all chats', null, renderPillButton('Archive all', () => setShowArchiveAllModal(true)))
+        });
+
+        settings.push({
+            id: 'deleteAll', tab: 'data', label: 'Delete all chats', description: '', keywords: 'delete all',
+            component: renderSettingRow('Delete all chats', null, renderPillButton('Delete all', () => toast.success('All chats deleted (Mock)'), true))
+        });
+
+        settings.push({
+            id: 'exportData', tab: 'data', label: 'Export data', description: '', keywords: 'export download',
+            component: renderSettingRow('Export data', null, renderPillButton('Export', () => setShowExportModal(true)))
+        });
+
+        settings.push({
+            id: 'chatHistory', tab: 'data', label: t('chatHistory'), description: 'Save new chats to your history and allow them to be used to improve our models.', keywords: 'save toggle',
+            component: renderSettingRow(t('chatHistory'), 'Save new chats to your history and allow them to be used to improve our models.', renderToggle(personalizations.dataControls?.chatHistory === 'On', (val) => updatePersonalization('dataControls', { chatHistory: val ? 'On' : 'Off' })))
         });
 
         // Account
@@ -374,6 +492,7 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
                                 className="relative group/avatar cursor-pointer shrink-0"
                                 onClick={() => document.getElementById('dropdown-avatar-upload').click()}
                             >
+                                <input type="file" id="dropdown-avatar-upload" hidden accept="image/*" onChange={handleAvatarUpload} />
                                 <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover/avatar:opacity-100 transition-opacity" />
                                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden relative z-10 transition-transform group-hover/avatar:scale-105">
                                     {user.avatar ? (
@@ -575,6 +694,88 @@ const ProfileSettingsDropdown = ({ onClose, onLogout }) => {
                                 </button>
                             </div>
                         )}
+                    </motion.div>
+                </div>
+            )}
+            {/* Shared Links Modal */}
+            {showSharedLinksModal && (
+                <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-transparent backdrop-blur-[2px] p-4" onClick={() => setShowSharedLinksModal(false)}>
+                    <motion.div initial={{ opacity: 0, scale: 0.98, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="bg-white dark:bg-[#1E2438] rounded-[20px] w-full max-w-[650px] shadow-[0_10px_40px_-5px_rgba(0,0,0,0.15)] border border-gray-100 dark:border-white/10" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-white/5">
+                            <h3 className="text-base font-medium text-gray-800 dark:text-gray-100">Shared Links</h3>
+                            <button onClick={() => setShowSharedLinksModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-1">
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <div className="p-4 py-8">
+                            <p className="text-[13px] text-gray-500 dark:text-gray-400">You have no shared links.</p>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+
+            {/* Archived Chats Modal */}
+            {showArchivedChatsModal && (
+                <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-transparent backdrop-blur-[2px] p-4" onClick={() => setShowArchivedChatsModal(false)}>
+                    <motion.div initial={{ opacity: 0, scale: 0.98, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="bg-white dark:bg-[#1E2438] rounded-[20px] w-full max-w-[650px] shadow-[0_10px_40px_-5px_rgba(0,0,0,0.15)] border border-gray-100 dark:border-white/10" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-white/5">
+                            <h3 className="text-base font-medium text-gray-800 dark:text-gray-100">Archived Chats</h3>
+                            <button onClick={() => setShowArchivedChatsModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-1">
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <div className="p-4 py-8">
+                            <p className="text-[13px] text-gray-500 dark:text-gray-400">You have no archived chats.</p>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+
+            {/* Archive All Modal */}
+            {showArchiveAllModal && (
+                <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-transparent backdrop-blur-[2px] p-4" onClick={() => setShowArchiveAllModal(false)}>
+                    <motion.div initial={{ opacity: 0, scale: 0.98, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="bg-white dark:bg-[#1E2438] rounded-3xl w-full max-w-[450px] shadow-[0_10px_40px_-5px_rgba(0,0,0,0.15)] border border-gray-100 dark:border-white/10" onClick={e => e.stopPropagation()}>
+                        <div className="p-5 pb-6">
+                            <h3 className="text-[15px] text-gray-800 dark:text-gray-100">Archive your chat history - are you sure?</h3>
+                        </div>
+                        <div className="px-5 pb-5 flex items-center justify-end gap-3">
+                            <button onClick={() => setShowArchiveAllModal(false)} className="px-5 py-2.5 rounded-full text-sm font-bold border border-gray-200 dark:border-white/20 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                                Cancel
+                            </button>
+                            <button onClick={() => { setShowArchiveAllModal(false); toast.success('All chats archived'); }} className="px-5 py-2.5 rounded-full text-sm font-bold bg-black dark:bg-white text-white dark:text-black hover:opacity-90 transition-opacity">
+                                Confirm archive
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+
+            {/* Export Data Modal */}
+            {showExportModal && (
+                <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-transparent backdrop-blur-[2px] p-4" onClick={() => setShowExportModal(false)}>
+                    <motion.div initial={{ opacity: 0, scale: 0.98, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="bg-white dark:bg-[#1E2438] rounded-[20px] w-full max-w-[450px] shadow-[0_10px_40px_-5px_rgba(0,0,0,0.15)] border border-gray-100 dark:border-white/10" onClick={e => e.stopPropagation()}>
+                        <div className="p-5">
+                            <h3 className="text-[15px] text-gray-800 dark:text-gray-100 mb-4">Request data export - are you sure?</h3>
+                            <ul className="list-disc pl-5 space-y-2 mb-4 text-[13px] text-gray-700 dark:text-gray-300">
+                                <li>Your account details and chats will be included in the export.</li>
+                                <li>The data will be sent to your registered email in a downloadable file.</li>
+                                <li>The download link will expire 24 hours after you receive it.</li>
+                                <li>Processing may take some time. You'll be notified when it's ready.</li>
+                            </ul>
+                            <p className="text-[13px] text-gray-700 dark:text-gray-300 mb-5">To proceed, click "Confirm export" below.</p>
+                        </div>
+                        <div className="px-5 pb-5 mt-auto flex justify-end gap-3">
+                            <button onClick={() => setShowExportModal(false)} disabled={isExporting} className="px-5 py-2.5 rounded-full text-sm font-bold border border-gray-200 dark:border-white/20 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50">
+                                Cancel
+                            </button>
+                            <button onClick={handleConfirmExport} disabled={isExporting} className="px-5 py-2.5 rounded-full text-sm font-bold bg-black dark:bg-white text-white dark:text-black flex items-center justify-center min-w-[140px] hover:opacity-90 transition-opacity disabled:opacity-70">
+                                {isExporting ? (
+                                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
+                                ) : (
+                                    "Confirm export"
+                                )}
+                            </button>
+                        </div>
                     </motion.div>
                 </div>
             )}

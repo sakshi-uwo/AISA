@@ -64,6 +64,7 @@ console.log(API);
 const apis = {
   resetPassword: `${API}/auth/reset-password-otp`,
   user: `${API}/user`,
+  uploadAvatar: `${API}/user/avatar`,
   profile: `${API}/user/profile`,
   getPayments: `${API}/user/payments`,
   notifications: `${API}/notifications`,
@@ -97,6 +98,7 @@ const apis = {
     purchase: `${API}/subscription/purchase-plan`,
     verify: `${API}/subscription/verify-payment`,
   },
+  dataExport: `${API}/user/data/export`,
   aibase: {
     chat: `${API}/aibase/chat`,
     knowledge: `${API}/aibase/knowledge`,
